@@ -72,3 +72,7 @@ Provide a privacy mode that enforces:
 ## Audit logging
 
 Every consequential action should be recorded without exposing secrets. The audit log should capture file reads, modifications, tests, approvals, token events, and model selection decisions.
+
+## Implemented project boundary
+
+The project engine normalizes the selected root and rejects absolute paths or traversal outside that root. It excludes configured directories, binary files, and oversized files from text indexing. Before cloud context is built, `ProjectContextService` scans candidate file content locally for likely API keys, tokens, passwords, private keys, secrets, and connection strings; matching files are excluded and only their relative paths are reported. A project configured as local-only rejects cloud context requests.

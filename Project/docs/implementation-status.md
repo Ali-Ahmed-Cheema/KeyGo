@@ -83,3 +83,20 @@ This should be built as one vertical slice rather than isolated helper features.
 ## Current status
 
 The project is now at a verified prototype-to-foundation stage: the repository builds, tests pass, and core services are in place. It is ready for the next architecture milestone around live provider verification and model discovery.
+
+## Repository intelligence sprint update
+
+The first project-workspace vertical slice is now implemented:
+
+- `ProjectWorkspaceService` opens and normalizes a local folder.
+- Technology, framework, and Git-directory evidence is detected from the project root.
+- Default ignored directories and extensions prevent build output, dependencies, and common binary assets from entering the index.
+- Files are classified as source, test, configuration, documentation, data, binary, or unknown.
+- Local indexing and line-aware text search return relative paths and snippets.
+- Project-relative reads reject absolute paths and traversal outside the project root.
+- `ProjectContextService` ranks matching files, enforces a character budget, reports included/excluded references, and estimates tokens.
+- Likely secret-bearing files are excluded locally before cloud context is built.
+- Local-only privacy mode rejects cloud context requests.
+- The app accepts an optional folder argument and indexes it on startup.
+
+Still pending for the full sprint: persistent SQLite index storage, Roslyn symbols, incremental indexing, read-only Git details, dependency inventory, UI, provider-backed project chat, and the complete agent tool/permission surface.

@@ -119,3 +119,9 @@
 ## Conclusion
 
 The repository currently contains a promising architecture scaffold and a few early abstractions, but it is not yet a functional KeyGo Core Alpha. The project is still in the prototype-to-foundation stage, and the next sprint must focus on secure credential storage, real provider adapters, model discovery, streaming chat, persistence, and safety enforcement before the app can be considered production-ready.
+
+## Repository intelligence update
+
+The repository now also contains a working first project-engine slice in `ProjectWorkspaceService` and `ProjectContextService`. It can open a local folder, detect technology evidence, index allowed text files, classify files, search with line references, reject path traversal, enforce a context budget, block likely secret-bearing files, and enforce local-only privacy mode. The app shell accepts a folder path argument and displays basic index information.
+
+The remaining claims above should be read as the broader roadmap; they are not yet implemented by this slice.

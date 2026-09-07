@@ -106,3 +106,9 @@ The first implementation milestone is KeyGo Core Alpha and includes:
 ## Design guidance
 
 Prefer maintainability over cleverness. The runtime should be modular, interface-driven, and testable. Keep provider-specific logic isolated and keep security decisions out of the AI prompt pipeline.
+
+## Project intelligence foundation
+
+The current project engine keeps the original repository in place and stores an in-memory index for the active process. `ProjectWorkspaceService` owns root normalization, ignore rules, file classification, evidence-based detection, indexing, search, and safe relative reads. `ProjectContextService` consumes those results and applies relevance ranking, secret filtering, privacy-mode enforcement, and a bounded context budget before any provider request.
+
+This boundary is deliberately read-only. File writes, deletes, terminal execution, Git mutation, and deployment are not part of the project tool surface.
