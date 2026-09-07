@@ -1,0 +1,1203 @@
+Absolutely. Since the **backend-first phase is done**, the frontend team should now build the **entire KeyGo user experience on top of the backend contracts**.
+
+Based on the KeyGo specification, I would divide the frontend work like this:
+
+# KeyGo — Frontend-First Development Checklist
+
+## 1. Frontend Architecture
+
+First establish the frontend structure.
+
+### Core areas
+
+* App shell / layout
+* Sidebar navigation
+* Top navigation/header
+* Main content area
+* Command palette
+* Global modal system
+* Toast/notification system
+* Loading states
+* Error states
+* Empty states
+* Confirmation dialogs
+* Keyboard shortcuts
+* Theme system
+* Responsive layout
+
+### Recommended main navigation
+
+```text
+KeyGo
+│
+├── Dashboard
+├── Chat
+├── Projects
+├── Agents
+├── Missions
+├── Models
+├── Providers
+├── Marketplace
+├── Usage & Costs
+├── Memory
+├── Activity / Audit
+├── Settings
+│
+└── System Status
+```
+
+---
+
+# 2. Dashboard
+
+The dashboard should be the user's main starting point.
+
+### UI components
+
+* Welcome/header
+* Current project
+* Active AI model
+* Provider status
+* API key status
+* Token usage
+* Cost today/month
+* Running agents
+* Running missions
+* Recent activity
+* Project health
+* Quick actions
+
+### Quick actions
+
+```text
++ New Chat
++ Open Project
++ Create Agent
++ Start Mission
++ Add Provider
++ Check Project Health
+```
+
+The dashboard should consume backend data rather than contain business logic.
+
+---
+
+# 3. Chat Interface
+
+This is one of the **most important frontend modules**.
+
+### Build
+
+* Conversation sidebar
+* New conversation
+* Conversation search
+* Message list
+* User message
+* AI message
+* Markdown rendering
+* Code blocks
+* Syntax highlighting
+* Copy code
+* Copy response
+* Regenerate
+* Stop generation
+* Retry
+* Edit message
+* Attach files
+* Image preview
+* Streaming response UI
+* Token usage display
+* Cost display
+* Model selector
+* Provider selector
+* System prompt/profile selector
+
+### Chat composer
+
+```text
+┌──────────────────────────────────────────┐
+│ Attach   @Agent   /Command               │
+│                                          │
+│ Ask KeyGo anything...                   │
+│                                          │
+│                         Model ▼  Send ➤  │
+└──────────────────────────────────────────┘
+```
+
+### Important states
+
+```text
+Idle
+↓
+Sending
+↓
+Streaming
+↓
+Completed
+```
+
+Also:
+
+```text
+Provider Error
+Rate Limited
+Invalid API Key
+Model Unavailable
+Cancelled
+```
+
+---
+
+# 4. Model Selector
+
+Users need to easily select models.
+
+Example:
+
+```text
+Select Model
+
+OpenAI
+  GPT-5.6
+  GPT-5.6 Mini
+
+Anthropic
+  Claude Sonnet
+  Claude Opus
+
+Google
+  Gemini
+
+Local
+  Llama
+  Qwen
+```
+
+Show:
+
+* Provider
+* Model name
+* Context window
+* Capabilities
+* Speed
+* Cost
+* Availability
+* Local/cloud badge
+
+---
+
+# 5. Provider Management UI
+
+Create a complete provider management screen.
+
+```text
+AI Providers
+
+OpenAI       ● Connected
+Anthropic    ● Connected
+Google       ● Not configured
+Mistral      ● Connected
+xAI          ● Error
+```
+
+Provider detail page:
+
+```text
+OpenAI
+
+Connection       Connected ✓
+API Key          •••••••••
+Models           12
+Status           Healthy
+
+[Verify Connection]
+
+Available Models
+─────────────────
+GPT...
+GPT...
+GPT...
+```
+
+Important: the frontend should **never display or transmit raw stored API keys unnecessarily**. KeyGo's specification specifically calls for provider credentials to remain local rather than being sent to a remote server. 
+
+---
+
+# 6. Project Workspace
+
+This is another major frontend area.
+
+### Project screen
+
+```text
+Project
+────────────────────────
+
+📁 src
+📁 components
+📁 services
+📄 package.json
+📄 README.md
+
+        Project Health
+        ───────────────
+        ✓ Build
+        ✓ Dependencies
+        ⚠ 3 Issues
+        ✗ 1 Error
+```
+
+### Features
+
+* File tree
+* File search
+* Open file
+* Tabs
+* Code editor
+* Terminal panel
+* Problems panel
+* Git status
+* Project health
+* Project intelligence
+* AI chat for project
+* Project settings
+
+The specification describes project intelligence, health reports, repository explanation and autonomous project actions, so the frontend should expose these as dedicated project views rather than burying everything inside Chat. 
+
+---
+
+# 7. Code Editor
+
+For the development environment, build:
+
+* File explorer
+* Tabs
+* Editor
+* Syntax highlighting
+* Search
+* Replace
+* Go to file
+* Go to symbol
+* Line numbers
+* Minimap
+* Problems
+* Terminal
+* Output
+* Git changes
+
+### AI actions
+
+Right-click / command menu:
+
+```text
+Explain Code
+Fix Code
+Refactor
+Optimize
+Generate Tests
+Generate Documentation
+Find Bugs
+Ask AI
+```
+
+---
+
+# 8. Project Health UI
+
+Create a visual health dashboard.
+
+```text
+Project Health
+
+Build             ✓
+Dependencies      ⚠
+Security          ✓
+Tests             ✗
+Type Errors       ⚠
+Technical Debt    ⚠
+
+Overall Score
+      82/100
+```
+
+Clicking an issue should show:
+
+```text
+Issue #24
+
+Unused dependency
+package: xyz
+
+Severity: Medium
+
+Why this matters
+...
+
+AI Recommendation
+...
+
+[Fix Automatically]
+[Explain]
+[Ignore]
+```
+
+---
+
+# 9. Agents UI
+
+The specification has a large agent system, so give agents their own frontend.
+
+### Agent dashboard
+
+```text
+My Agents
+
+Code Reviewer       ● Ready
+Bug Hunter          ● Ready
+Security Agent      ● Running
+Test Agent          ● Ready
+Documentation       ● Ready
+```
+
+### Agent creation
+
+```text
+Create Agent
+
+Name
+Description
+
+Model
+▼ GPT...
+
+Instructions
+[...................]
+
+Tools
+☑ Read Files
+☑ Search
+☐ Write Files
+☐ Terminal
+☐ Browser
+
+Permissions
+○ Read Only
+○ Developer
+○ Advanced
+
+[Create Agent]
+```
+
+---
+
+# 10. Agent Detail Page
+
+```text
+Security Agent
+
+Status: Running
+
+Mission
+Analyze authentication system
+
+Progress
+████████████░░ 82%
+
+Current Action
+Scanning auth middleware...
+
+Tools Used
+✓ File Search
+✓ Code Analysis
+✓ Dependency Scanner
+
+Actions
+[Pause] [Stop]
+```
+
+---
+
+# 11. Permission Firewall UI
+
+This is extremely important for KeyGo.
+
+Whenever an agent wants to perform a sensitive action:
+
+```text
+Permission Required
+
+Agent wants to:
+
+DELETE
+/src/old-auth.js
+
+Reason:
+Remove obsolete authentication implementation.
+
+Risk: HIGH
+
+[Allow Once]
+[Always Allow]
+[Deny]
+```
+
+For terminal:
+
+```text
+Agent wants to execute:
+
+npm install express
+
+Permission:
+☑ Allow this command
+
+[Allow] [Deny]
+```
+
+The specification explicitly includes a Permission Firewall and computer/agent permissions, so these should be visible frontend concepts, not hidden backend functionality. 
+
+---
+
+# 12. Mission Mode
+
+Mission Mode should feel like a major KeyGo experience.
+
+Example:
+
+```text
+MISSION
+
+Build authentication system
+
+Goal
+Create secure JWT authentication.
+
+────────────────────────
+
+Planning ✓
+Analyzing project ✓
+Creating files ✓
+Running tests ●
+Fixing errors ○
+Final review ○
+
+Progress
+██████████████░░ 87%
+
+Agent Activity
+Code Agent       Working
+Test Agent       Waiting
+Security Agent   Waiting
+
+[Pause Mission]
+[Cancel]
+```
+
+The user should be able to see **what KeyGo is doing**, not just receive a final answer.
+
+---
+
+# 13. Mission History
+
+```text
+Mission History
+
+✓ Build authentication
+  24 actions
+  18 min
+  Completed
+
+✗ Fix payment bug
+  12 actions
+  Failed
+
+✓ Add dark mode
+  8 actions
+  Completed
+```
+
+---
+
+# 14. Checkpoints & Rollback UI
+
+Because autonomous actions can modify projects, provide a visual safety system.
+
+```text
+Checkpoint
+
+Before Authentication Refactor
+2:43 PM
+
+Files changed: 14
+
+[View Changes]
+[Restore]
+```
+
+Diff screen:
+
+```text
+Before                  After
+
+- old code              + new code
+- function A            + function B
+```
+
+---
+
+# 15. Model Recommendation UI
+
+KeyGo's backend may recommend a model, but frontend needs to explain the recommendation.
+
+```text
+Recommended Model
+
+GPT-5.6
+
+Why?
+
+✓ Strong coding performance
+✓ Large context
+✓ Good project understanding
+✓ Estimated cost: $0.08
+
+Alternative
+
+Claude Sonnet
+Cost: $0.05
+
+[Use GPT-5.6]
+```
+
+The specification includes automatic model routing and model recommendation based on task characteristics, cost and capability. 
+
+---
+
+# 16. Usage & Cost Dashboard
+
+Create a proper analytics page.
+
+```text
+Usage & Costs
+
+Today
+$2.84
+
+This Month
+$47.23
+
+Tokens
+2.4M
+
+Requests
+482
+```
+
+Charts:
+
+* Daily cost
+* Token usage
+* Cost by model
+* Cost by provider
+* Cost by project
+* Cost by agent
+
+The specification specifically includes token/cost tracking and budgets. 
+
+---
+
+# 17. Budget UI
+
+```text
+Monthly Budget
+
+$47 / $100
+
+█████████░░░░░
+
+Remaining
+$53
+
+Warning threshold
+80%
+
+[Edit Budget]
+```
+
+Warnings:
+
+```text
+⚠ You've used 82% of your monthly AI budget.
+```
+
+---
+
+# 18. Memory & Personalization
+
+Frontend screens:
+
+```text
+Memory
+
+Preferences
+────────────────
+Coding style
+Dark theme
+Preferred language
+Preferred models
+
+Project Memory
+────────────────
+Architecture
+Important files
+Decisions
+
+Conversation Memory
+────────────────
+...
+```
+
+Allow users to:
+
+* View memory
+* Edit memory
+* Delete memory
+* Disable memory
+* Clear all memory
+
+---
+
+# 19. Marketplace
+
+For the later phase:
+
+```text
+Agent Marketplace
+
+Featured
+────────────────
+
+Code Reviewer
+★★★★★
+
+Security Auditor
+★★★★★
+
+React Expert
+★★★★☆
+
+[Install]
+```
+
+Agent detail:
+
+```text
+Security Auditor
+
+Description
+...
+
+Required Models
+...
+
+Required Tools
+...
+
+Permissions
+...
+
+Reviews
+...
+
+[Install Agent]
+```
+
+The specification includes an agent marketplace and workflows, so this should eventually be a dedicated frontend module. 
+
+---
+
+# 20. Activity / Audit
+
+Users need visibility into what KeyGo did.
+
+```text
+Activity
+
+19:32  Agent read auth.ts
+19:33  Agent modified auth.ts
+19:34  Tests executed
+19:35  4 tests passed
+19:36  Checkpoint created
+19:37  Mission completed
+```
+
+Filters:
+
+```text
+All
+AI
+Agent
+Project
+Security
+Terminal
+System
+```
+
+---
+
+# 21. Action Replay
+
+For autonomous workflows:
+
+```text
+Mission: Build Authentication
+
+Action 1 ✓
+Read package.json
+
+Action 2 ✓
+Read auth.ts
+
+Action 3 ✓
+Create middleware.ts
+
+Action 4 ✓
+Run tests
+
+Action 5 ✗
+Fix middleware
+
+[Replay Action]
+[View Details]
+```
+
+This connects directly to the Action Replay concept in the specification. 
+
+---
+
+# 22. System Status
+
+Create a global health/status page.
+
+```text
+KeyGo System
+
+Runtime             ✓
+Database            ✓
+Credential Vault    ✓
+Provider APIs       ✓
+Agent Runtime       ✓
+Project Indexer     ✓
+Terminal            ✓
+```
+
+Provider:
+
+```text
+OpenAI        ✓
+Anthropic     ✓
+Google        ⚠
+Local Models  ✓
+```
+
+---
+
+# 23. Settings
+
+Organize settings instead of one giant page.
+
+```text
+Settings
+
+General
+Appearance
+AI Providers
+Models
+API Keys
+Privacy
+Security
+Permissions
+Agents
+Memory
+Notifications
+Keyboard Shortcuts
+Projects
+Advanced
+```
+
+---
+
+# 24. Global Command Palette
+
+This should be built early.
+
+Shortcut:
+
+```text
+Ctrl + K
+```
+
+Example:
+
+```text
+╭─────────────────────────────────────╮
+│ Search KeyGo...                     │
+├─────────────────────────────────────┤
+│ → New Chat                           │
+│ → Open Project                       │
+│ → Create Agent                       │
+│ → Start Mission                      │
+│ → Run Project Health                 │
+│ → Search Files                       │
+│ → Change Model                       │
+│ → Open Settings                      │
+╰─────────────────────────────────────╯
+```
+
+---
+
+# 25. Notifications
+
+Build a centralized notification system.
+
+Examples:
+
+```text
+✓ Mission completed
+⚠ API key needs attention
+✗ Build failed
+✓ Checkpoint created
+⚠ Agent requires permission
+```
+
+---
+
+# 26. Frontend State Management
+
+The frontend needs centralized state for:
+
+```text
+User
+Project
+Active conversation
+Messages
+Current model
+Providers
+Agents
+Missions
+Permissions
+Usage
+Settings
+Notifications
+```
+
+Do **not** put backend business logic inside frontend state.
+
+Frontend should primarily:
+
+```text
+User Action
+     ↓
+Frontend
+     ↓
+API / IPC
+     ↓
+Backend
+     ↓
+Response
+     ↓
+Frontend State
+     ↓
+UI
+```
+
+---
+
+# 27. Loading / Empty / Error States
+
+This is something frontend teams often forget.
+
+Every screen should have:
+
+### Loading
+
+```text
+Loading projects...
+```
+
+### Empty
+
+```text
+No projects yet.
+
+Create your first project.
+
+[Create Project]
+```
+
+### Error
+
+```text
+Unable to load providers.
+
+[Retry]
+```
+
+### Offline
+
+```text
+You're offline.
+
+Local functionality remains available.
+```
+
+This fits KeyGo's local-first architecture and its planned Offline Emergency Mode. 
+
+---
+
+# 28. Frontend Security UX
+
+Frontend should visually handle:
+
+* Permission requests
+* API key status
+* Secret detection warnings
+* Dangerous commands
+* File deletion confirmation
+* Agent permissions
+* Browser permissions
+* Computer-control permissions
+* Security alerts
+
+Example:
+
+```text
+⚠ Sensitive Operation
+
+This action will modify 23 files.
+
+Create checkpoint before continuing?
+
+[Create Checkpoint]
+[Continue]
+[Cancel]
+```
+
+---
+
+# 29. Responsive Design
+
+Even though KeyGo is primarily a desktop developer environment, the UI should still handle:
+
+* Different monitor sizes
+* Small laptop screens
+* Split panels
+* Resizable sidebar
+* Resizable terminal
+* Full-screen editor
+* Full-screen chat
+* Collapsible panels
+
+---
+
+# 30. Frontend Component Library
+
+Before building every page separately, create reusable components.
+
+### Basic
+
+```text
+Button
+Input
+Select
+Checkbox
+Switch
+Badge
+Tooltip
+Avatar
+Dropdown
+Tabs
+Card
+Modal
+Toast
+Progress
+Skeleton
+```
+
+### KeyGo-specific
+
+```text
+ModelSelector
+ProviderCard
+AgentCard
+MissionCard
+PermissionDialog
+TokenUsage
+CostIndicator
+FileTree
+CodeEditor
+DiffViewer
+AgentStatus
+MissionProgress
+HealthScore
+ActivityTimeline
+ChatMessage
+ChatComposer
+```
+
+---
+
+# Recommended Frontend Build Order
+
+Don't build all 30 things simultaneously.
+
+I'd give the frontend team this order:
+
+### Phase 1 — Foundation
+
+```text
+1. Frontend architecture
+2. Design system
+3. App shell
+4. Sidebar
+5. Routing
+6. Theme
+7. State management
+8. API/IPC client
+9. Notifications
+10. Modal system
+```
+
+### Phase 2 — Core Experience
+
+```text
+11. Dashboard
+12. Chat
+13. Model selector
+14. Provider management
+15. Settings
+```
+
+### Phase 3 — Developer Experience
+
+```text
+16. Projects
+17. File explorer
+18. Code editor
+19. Terminal
+20. Project health
+21. Git/diff UI
+```
+
+### Phase 4 — AI Automation
+
+```text
+22. Agents
+23. Agent creation
+24. Agent permissions
+25. Permission Firewall
+26. Missions
+27. Mission progress
+28. Checkpoints
+29. Rollback
+30. Action history
+```
+
+### Phase 5 — Intelligence & Analytics
+
+```text
+31. Model recommendations
+32. Usage
+33. Costs
+34. Budgets
+35. Memory
+36. Personalization
+37. Audit
+```
+
+### Phase 6 — Advanced
+
+```text
+38. Marketplace
+39. Browser Agent UI
+40. Computer Agent UI
+41. QA
+42. Review Battle
+43. Attack My Application
+44. Project Doctor
+45. Offline Mode
+```
+
+---
+
+# Frontend Team Structure
+
+If you have multiple developers, I'd split it like this:
+
+| Team                       | Responsibility                                   |
+| -------------------------- | ------------------------------------------------ |
+| **Frontend Lead**          | Architecture, routing, state, API integration    |
+| **UI/Design**              | Design system, layouts, components               |
+| **Chat Team**              | Chat, streaming, models, conversations           |
+| **IDE Team**               | Projects, editor, terminal, files                |
+| **Agent Team**             | Agents, missions, permissions                    |
+| **Analytics Team**         | Usage, costs, dashboards                         |
+| **Settings/Security Team** | Providers, credentials UI, permissions, security |
+| **QA**                     | Frontend testing, accessibility, UI states       |
+
+---
+
+# Most Important Rule
+
+Since you've already chosen a **Backend-First Approach**, the frontend team should **not start inventing backend behavior**.
+
+The workflow should be:
+
+```text
+                    BACKEND
+                       │
+                 API / IPC Contract
+                       │
+                       ▼
+                  FRONTEND
+                       │
+        ┌──────────────┼──────────────┐
+        ▼              ▼              ▼
+       UI            State          UX
+        │              │              │
+        └──────────────┼──────────────┘
+                       ▼
+                    User
+```
+
+For every frontend feature, define:
+
+```text
+Feature
+↓
+Screen
+↓
+Components
+↓
+User Actions
+↓
+API/IPC endpoint
+↓
+Request
+↓
+Response
+↓
+Loading state
+↓
+Success state
+↓
+Error state
+↓
+Empty state
+```
+
+**For KeyGo specifically, I would prioritize the frontend MVP as:**
+
+> **App Shell → Dashboard → Chat → Providers → Models → Projects → Code Editor → Agents → Permissions → Missions → Usage/Costs → Settings**
+
+That gives you the actual **KeyGo product experience** without trying to implement every advanced feature in the 3,600+ line specification at once. The specification itself recommends progressively adding the advanced marketplace, local models, computer control, multi-agent factory, and advanced automation after the core runtime/chat/workspace/agent foundation. 

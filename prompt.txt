@@ -1,1066 +1,734 @@
-KEYGO — NEXT MAJOR IMPLEMENTATION MILESTONE
-Mission: Turn the Core Alpha into a Usable AI Coding Workspace
-KeyGo currently has a .NET 10 + C# foundation with WinUI 3, SQLite/EF Core, Serilog, provider abstractions, credential handling, routing, usage tracking, auditing, permissions, and project-oriented architecture.
-The next goal is NOT to create another planning document.
-The goal is to make the existing architecture work together as a real end-to-end developer product.
-After this milestone, a user should be able to:
-Open KeyGo
-   ↓
-Open a local project
-   ↓
-See project structure
-   ↓
-Connect/verify an AI provider
-   ↓
-Choose a model
-   ↓
-Start an AI coding session
-   ↓
-Ask about the project
-   ↓
-KeyGo retrieves relevant context
-   ↓
-AI analyzes the project
-   ↓
-AI creates a plan
-   ↓
-User approves
-   ↓
-AI proposes code changes
-   ↓
-KeyGo displays a real diff
-   ↓
-User approves
-   ↓
-KeyGo safely modifies files
-   ↓
-KeyGo runs build/tests
-   ↓
-AI analyzes results
-   ↓
-Final report
+KEYGO FRONTEND ALPHA
+The KeyGo backend/core architecture is now sufficiently established to begin serious frontend development.
+Do NOT create another static prototype or placeholder UI.
+Build the first real KeyGo Windows desktop interface using WinUI 3 + C# + .NET 10, designed to connect directly to the existing KeyGo.Core services.
+The frontend should be modular, responsive, lightweight, accessible, and ready to consume real backend services.
 
-This is the milestone that should make KeyGo feel like a real application rather than a collection of backend components.
+1. PRIMARY OBJECTIVE
+Transform the current WinUI application shell into a functional KeyGo desktop workspace.
+The application should visually communicate:
 
-1. FIRST: FULL PROJECT AUDIT
-Before writing significant new code, inspect the entire repository.
-Review:
+KeyGo — One AI, Your Way.
 
-KeyGo.Core
-KeyGo.App
-KeyGo.Core.Tests
-docs
-ADRs
-provider abstractions
-routing
-credentials
-permissions
-project services
-database
-logging
-existing UI
-existing tests
+The user should immediately understand that KeyGo is:
 
-Create an internal implementation map:
-IMPLEMENTED
-PARTIALLY IMPLEMENTED
-PLACEHOLDER
-NOT IMPLEMENTED
-BROKEN
-DUPLICATED
+a local-first AI workspace
+a multi-provider AI client
+a coding agent
+a project workspace
+a secure BYOK application
 
-Do not duplicate existing functionality.
-Reuse existing abstractions wherever possible.
-If existing architecture prevents the new workflow from being implemented cleanly, refactor it rather than creating parallel systems.
 
-2. CREATE THE REAL KEYGO WORKSPACE
-The WinUI 3 application should become a functional workspace.
-Target layout:
+2. MAIN APPLICATION LAYOUT
+Create the primary application shell:
 ┌──────────────────────────────────────────────────────────────┐
-│ KEYGO                                      Model ▼  Settings │
-├───────────────┬──────────────────────────────────┬───────────┤
-│ PROJECT       │                                  │           │
-│               │          CHAT / AGENT            │ INSPECTOR │
-│ 📁 src        │                                  │           │
-│ 📁 tests      │ User: Fix the login bug.        │ Context   │
-│ 📄 README     │                                  │           │
-│ 📄 package    │ KeyGo: Investigating...        │ Model     │
-│               │                                  │ Tokens    │
-│               │                                  │ Cost      │
-│               │                                  │           │
-├───────────────┴──────────────────────────────────┴───────────┤
-│ Agent: Ready     Permission: Assist     Project: MyApp       │
+│ KeyGo     Project ▼       Model ▼       ⚙ Settings      ●   │
+├──────────────┬───────────────────────────────┬───────────────┤
+│              │                               │               │
+│  PROJECT     │         AI WORKSPACE          │   INSPECTOR   │
+│              │                               │               │
+│  📁 src      │  Conversation / Agent        │   Context     │
+│  📁 tests    │                               │   Model       │
+│  📄 README   │                               │   Provider    │
+│  📄 ...      │                               │   Tokens      │
+│              │                               │   Cost        │
+│              │                               │               │
+│              │                               │               │
+├──────────────┴───────────────────────────────┴───────────────┤
+│ ● Ready    Project: MyApp    Model: ...    Privacy: CLOUD    │
 └──────────────────────────────────────────────────────────────┘
 
-The exact visual design can evolve, but the application should establish these major surfaces:
-Project Explorer
-Chat/Agent
-Context Inspector
-Activity/Agent Timeline
-Model/Provider selector
-Approval UI
-Diff viewer
-Usage/cost panel
+Use WinUI 3 navigation and reusable components rather than one enormous page.
 
-3. PROJECT OPENING
-Implement:
-Open Project
+3. DESIGN PRINCIPLES
+KeyGo should feel like a modern developer application.
+Prioritize:
 
-Support:
+clean interface
+keyboard accessibility
+fast navigation
+minimal unnecessary animations
+excellent dark/light theme support
+clear information hierarchy
+developer-focused UX
+compact use of screen space
+responsive layouts
+virtualization for large project trees
+no UI freezing during backend operations
 
-folder picker
-recent projects
-project root detection
-project metadata
-Git detection
-technology detection
+Do not imitate another product's interface pixel-for-pixel.
+Develop KeyGo's own visual identity.
 
+4. APPLICATION NAVIGATION
+Create navigation for:
+🏠 Home
+💬 Chat
+🤖 Agent
+📁 Projects
+🔌 Providers
+🧠 Models
+📊 Usage
+🛡 Security
+⚙ Settings
+
+Future navigation should be possible without redesigning the shell.
+Possible future sections:
+Marketplace
+Agents
+Local Models
+Voice
+Browser
+GitHub
+Extensions
+
+Do not implement empty future pages unless useful.
+
+5. HOME DASHBOARD
+Create a useful home dashboard.
 Example:
-C:\Projects\MyApplication
+Welcome back
 
-KeyGo should detect:
-Git ✓
-.NET ✓
-Node.js ✓
-Tests ✓
-README ✓
+Recent Projects
+────────────────────────
 
-Do not assume every project is .NET.
-Prepare detection for:
-.NET
-Node/TypeScript
-Python
-Rust
-Java
-C/C++
+MyApp
+Last opened: Today
 
-The initial implementation can have stronger support for .NET and Node while keeping the architecture extensible.
+ShopSystem
+Last opened: Yesterday
 
-4. PROJECT EXPLORER
-Implement a real project tree.
+
+CONNECTED AI
+
+✓ OpenAI
+✓ Gemini
+○ Anthropic
+
+
+QUICK ACTIONS
+
+[ Open Project ]
+[ New Chat ]
+[ Connect AI ]
+[ Analyze Project ]
+
+Show actual data from Core services where available.
+Avoid fake hardcoded production-looking data.
+
+6. PROJECT EXPLORER
+Implement the real project tree.
 Requirements:
 
-directories
-files
+folder navigation
+file navigation
 expand/collapse
 refresh
 search
-file selection
-open file
-recent files
-ignored files
+recent projects
+project switching
 
-Respect:
-.gitignore
+Integrate with KeyGo.Core project services.
+Do not put filesystem logic directly inside UI controls.
+Correct architecture:
+WinUI
+ ↓
+ViewModel
+ ↓
+Application Service
+ ↓
+KeyGo.Core
+ ↓
+Filesystem
 
-and other appropriate ignore rules.
-Do not scan enormous generated directories unnecessarily.
-Examples:
-node_modules
-bin
-obj
-.git
-dist
-build
 
-should be intelligently excluded from normal indexing unless explicitly requested.
-
-5. CODE VIEWER
-Implement a lightweight code viewer.
+7. CHAT INTERFACE
+Create the primary AI chat interface.
 Requirements:
 
-syntax highlighting
-line numbers
-search
-copy
-select
-jump to line
-large-file handling
-
-When the AI references:
-AuthService.cs:42
-
-the user should be able to click it and navigate directly to the location.
-
-6. PROJECT INDEX / CONTEXT ENGINE
-Implement a practical project context system.
-KeyGo must NOT send the entire project to the AI for every request.
-Pipeline:
-Project
-   ↓
-File discovery
-   ↓
-Ignore filtering
-   ↓
-Metadata extraction
-   ↓
-Index
-   ↓
-Search
-   ↓
-Relevant context
-   ↓
-Provider
-
-Start with deterministic techniques:
-
-filename search
-path search
-text search
-symbol-like search
-recently modified files
-Git diff
-project configuration
-README
-relevant imports/references
-
-Keep the architecture ready for semantic/vector search later.
-Do not make a vector database mandatory for this milestone.
-
-7. CONTEXT INSPECTOR
-Before an AI request, show what KeyGo intends to provide.
-Example:
-CONTEXT
-
-Files:
-AuthService.cs
-LoginController.cs
-AuthTests.cs
-Program.cs
-
-Estimated context:
-8,420 tokens
-
-Provider:
-OpenAI
-
-Model:
-Selected Model
-
-Privacy:
-☁ Cloud
-
-[View Context]
-
-The user should be able to inspect the actual context.
-This is an important privacy/trust feature.
-
-8. CHAT ENGINE
-Connect the UI to the existing provider runtime.
-Support:
-User message
-   ↓
-Context selection
-   ↓
-Provider adapter
-   ↓
-Streaming response
-   ↓
-Chat UI
-
-The UI should display streaming output rather than waiting for the entire response.
-Support:
-
-stop generation
-retry
-regenerate
-copy response
-code blocks
+message history
+streaming responses
 markdown
-conversation history
+code blocks
+copy button
+retry
+stop generation
+attachments/context
+model selector
+provider indicator
 
-
-9. MODEL SELECTOR
-Create a model selector connected to the existing provider/model discovery architecture.
 Example:
-Provider:
-[ OpenAI ▼ ]
+┌───────────────────────────────────────────┐
+│ Model: GPT-X ▼       ☁ Cloud              │
+├───────────────────────────────────────────┤
+│                                           │
+│ You                                       │
+│ Why is authentication failing?            │
+│                                           │
+│ KeyGo                                     │
+│ I'll inspect the authentication flow...    │
+│                                           │
+│ [code block]                              │
+│                                           │
+├───────────────────────────────────────────┤
+│ + Context     Type a message...       ➤  │
+└───────────────────────────────────────────┘
 
-Model:
-[ Model A ▼ ]
+Streaming must update the UI incrementally.
 
-Also allow:
-Auto
-
-for future smart routing.
-Display useful metadata where available:
-Context
-Input price
-Output price
+8. MODEL SELECTOR
+Build a reusable model selector component.
+Display:
+Provider
+Model
 Capabilities
-Vision
-Tool use
-Reasoning
+Context
+Price
+Availability
 
-Do not hardcode model capabilities when the provider can supply them dynamically.
+Example:
+OpenAI
+ ├─ Model A
+ ├─ Model B
+ └─ Model C
+
+Google
+ ├─ Gemini X
+ └─ Gemini Y
+
+Anthropic
+ ├─ Claude X
+ └─ Claude Y
+
+Populate from the existing model discovery system.
+Do not hardcode model names wherever avoidable.
+
+9. PROVIDER CONNECTION UI
+Create a professional provider management page.
+Example:
+AI PROVIDERS
+
+┌───────────────────────────────┐
+│ OpenAI                        │
+│ ✓ Connected                   │
+│ 12 models available           │
+│                               │
+│ [Inspect] [Models] [Remove]   │
+└───────────────────────────────┘
+
+┌───────────────────────────────┐
+│ Google Gemini                 │
+│ ○ Not connected               │
+│                               │
+│ [Connect]                     │
+└───────────────────────────────┘
+
+Connection flow:
+Choose Provider
+       ↓
+Enter API Key
+       ↓
+Validate
+       ↓
+Discover Models
+       ↓
+Show Capabilities
+       ↓
+Connected
+
+Never display the complete API key after submission.
 
 10. CONNECTION INSPECTOR
-Integrate provider verification.
-Example:
-CONNECTION
+Create a detailed inspector:
+CONNECTION INSPECTOR
 
-Provider:
+Provider
 OpenAI
 
-Credential:
-••••••••••••
-
-Status:
+Status
 ✓ Verified
 
-API:
-✓ Reachable
+Credential
+••••••••••••
 
-Models:
-✓ 14 discovered
+Endpoint
+Provider endpoint
 
-Selected:
-Model A
+Models
+14 discovered
 
-Capabilities:
+Capabilities
 ✓ Text
 ✓ Streaming
 ✓ Vision
 
-For failures:
-✗ Authentication failed
+Latency
+182 ms
 
-Possible causes:
-- invalid API key
-- expired credential
-- insufficient permissions
-- provider unavailable
+Last verified
+2 minutes ago
 
-Do not expose credentials in logs or UI.
+The UI should consume the existing provider verification results.
 
-11. CHAT MODES
-Implement the foundation for:
-Chat
-Code
-Agent
-
-Do not implement every future mode immediately.
-Chat
-Normal AI conversation.
-Code
-Optimized coding conversation with project context.
-Agent
-Can use KeyGo tools subject to permissions.
-Prepare architecture for future:
-Vision
-Image
-Voice
-
-without making them mandatory now.
-
-12. AGENT TOOL REGISTRY
-Connect the existing permission system to actual tools.
-Create a unified tool registry.
-Initial tools:
-GetProjectTree
-ReadFile
-SearchFiles
-SearchText
-GetGitStatus
-GetGitDiff
-GetProjectMetadata
-
-Editing:
-CreateFile
-ModifyFile
-DeleteFile
-MoveFile
-RenameFile
-
-Execution:
-RunBuild
-RunTests
-RunCommand
-
-Each tool must declare:
-Name
-Description
-Input
-Output
-Required permission
-Risk level
-
-
-13. REAL PERMISSION ENFORCEMENT
-The AI must never directly manipulate the filesystem.
-Correct architecture:
-AI
- ↓
-Tool request
- ↓
-Permission engine
- ↓
-Policy check
- ↓
-Approval if required
- ↓
-Tool execution
-
-Never:
-AI → filesystem directly
-
-
-14. AGENT SESSION
-Create a structured agent session.
+11. AGENT WORKSPACE
+Create a dedicated Agent interface.
 Example:
-Agent Session
+AGENT
 
-Goal:
-Fix login failure
+Goal
+Fix authentication failure
 
-State:
-Investigating
+Model
+Model X
 
-Model:
-Selected Model
-
-Provider:
-OpenAI
-
-Permission:
+Permission
 Assist
 
-Budget:
-$1.00
+Status
+Investigating...
 
-Track:
-session ID
-project
-model
-provider
-start time
-end time
-state
-tools used
-files touched
-tokens
-cost
+ACTIVITY
 
+✓ Project scanned
+✓ 18 files inspected
+✓ Authentication files identified
+→ Analyzing LoginController.cs
+○ Waiting for result
 
-15. AGENT INVESTIGATION
+This should become the foundation for future autonomous workflows.
+
+12. APPROVAL UI
+Create first-class approval dialogs/cards.
 Example:
-User:
+KEYGO WANTS TO MODIFY FILES
 
-Why is login broken?
-
-KeyGo should:
-1. Understand request
-2. Search project
-3. Find authentication-related files
-4. Read relevant files
-5. Inspect tests
-6. Inspect recent Git changes
-7. Form hypothesis
-
-Then respond with findings.
-Example:
-I found a likely issue.
-
-AuthService.cs validates the password correctly,
-but LoginController.cs does not reject disabled accounts.
-
-Relevant files:
-3
-
-Confidence:
-High
-
-
-16. PLAN MODE
-Before editing:
-PLAN
-
-1. Update LoginController
-2. Add disabled-account validation
-3. Add regression tests
-4. Build project
-5. Run authentication tests
-
-Display:
-Files expected:
-2
-
-Commands expected:
-2
+3 files will be changed.
 
 Risk:
 Low
 
-Estimated AI cost:
-$0.04–$0.09
+Changes:
++42
+-11
+
+[Review Changes]
 
 [Approve]
-[Edit Plan]
-[Cancel]
+[Reject]
 
+Never hide important consequences behind generic confirmation dialogs.
 
-17. CHANGE GENERATION
-After approval, ask the AI to produce structured changes.
-Do not let the AI return an arbitrary shell command as the primary editing mechanism.
-Prefer:
-FileChange
- ├── path
- ├── operation
- ├── original content/version
- └── proposed content
-
-Validate all paths.
-
-18. DIFF ENGINE
-Build a proper diff system.
-Example:
-AuthService.cs
-
-- if (user == null)
-+ if (user == null || !user.IsActive)
-      return false;
-
-Display:
-3 files
-+31 lines
--8 lines
-
+13. DIFF VIEWER
+Build a reusable code diff component.
 Support:
-Accept
-Reject
+
+additions
+deletions
+unchanged context
+line numbers
+file names
+syntax highlighting where practical
+accept
+reject
+
+Future-ready architecture should allow:
 Accept file
 Reject file
-
-If practical:
 Accept hunk
 Reject hunk
 
 
-19. FILE TRANSACTION SYSTEM
-Before modifying files:
-Validate
- ↓
-Create snapshot
- ↓
-Apply change
- ↓
-Verify
+14. CONTEXT INSPECTOR
+Create a panel showing exactly what will be sent to an AI provider.
+Example:
+CONTEXT
 
-If application fails:
-Rollback
-
-Avoid leaving half-applied changes.
-Never overwrite a file blindly if its contents changed since the AI read it.
-Detect conflicts:
-FILE CHANGED EXTERNALLY
-
-AuthService.cs changed after KeyGo analyzed it.
-
-[Reload]
-[Compare]
-[Overwrite]
-[Cancel]
-
-Default should favor safety.
-
-20. TEST EXECUTION
-After accepted changes:
-Build
- ↓
-Tests
-
-Use detected project configuration.
-For .NET:
-dotnet build
-dotnet test
-
-For Node:
-npm test
-npm run build
-
-Do not execute arbitrary commands without the command permission system.
-
-21. TEST RESULT UI
-Display:
-TEST RESULTS
-
-✓ 47 passed
-✗ 2 failed
-○ 1 skipped
-
-Allow the user to inspect failures.
-
-22. CONTROLLED AI REPAIR LOOP
-If tests fail:
-Failure
- ↓
-AI analyzes failure
- ↓
-Proposed fix
- ↓
-Diff
- ↓
-Approval
- ↓
-Apply
- ↓
-Test again
-
-Set hard limits:
-Maximum repair iterations
-Maximum files changed
-Maximum commands
-Maximum runtime
-Maximum AI cost
-
-Never implement an infinite autonomous loop.
-
-23. ACTIVITY TIMELINE
-Create:
-AGENT ACTIVITY
-
-20:41 Started investigation
-20:41 Searched 124 files
-20:42 Read AuthService.cs
-20:42 Read LoginController.cs
-20:43 Created plan
-20:43 Waiting for approval
-20:44 Plan approved
-20:44 Generated changes
-20:45 User approved diff
-20:45 Modified 2 files
-20:46 Running tests
-20:46 47 passed / 2 failed
-
-Every consequential action should be auditable.
-
-24. USAGE + COST PANEL
-Connect to the existing usage system.
-Display:
-SESSION USAGE
-
-Input:
-8,421
-
-Output:
-2,103
-
-Total:
-10,524
-
-Estimated cost:
-$0.034
-
-Budget:
-$1.00
-
-Remaining:
-$0.966
-
-If the provider supplies exact usage, prefer provider-reported values.
-If not, clearly label estimates.
-Never pretend an estimate is exact.
-
-25. SECRET SCANNING
-Before sending project context to a cloud model:
-Project files
- ↓
-Secret detection
- ↓
-Redaction/exclusion
- ↓
-Context builder
- ↓
 Provider
-
-Detect common:
-API keys
-access tokens
-passwords
-private keys
-.env values
-connection strings
-credentials
-
-Default behavior:
-EXCLUDED
-
-The user can inspect what was excluded.
-Never send KeyGo's own stored credentials to an AI model.
-
-26. PRIVACY INDICATOR
-Every AI request should clearly show:
-☁ CLOUD
-
-or:
-💻 LOCAL
-
-or:
-🔀 HYBRID
-
-For cloud requests:
-Provider:
 OpenAI
 
-Files being sent:
-5
+Model
+Model X
 
-Estimated context:
-8,421 tokens
+Files
+✓ AuthService.cs
+✓ LoginController.cs
+✓ AuthTests.cs
 
-This should become one of KeyGo's signature UX features.
+Estimated tokens
+8,420
 
-27. LOCAL-FIRST BEHAVIOR
-Do not force cloud AI.
-Create the runtime abstraction so the same agent can eventually operate with:
-Cloud Provider
-Local Model
-Hybrid
+Privacy
+☁ CLOUD
 
-For this milestone, local model execution may remain limited if it is not already implemented.
-The important requirement is that the agent architecture does not depend on cloud-only execution.
-
-28. GIT INTEGRATION
-Implement safe Git inspection:
-Git status
-Git diff
-Git log
-Changed files
-
-Display:
-Git
-
-Branch:
-main
-
-Modified:
-3
-
-Untracked:
-1
-
-Ahead:
+Secrets excluded
 2
 
-Behind:
-0
+Allow:
+[View Context]
 
-Do NOT automatically:
-commit
-push
-reset
-clean
-force push
+The user must have transparency about project data leaving the machine.
 
-unless explicitly authorized.
+15. USAGE PANEL
+Create a reusable usage component.
+SESSION
 
-29. SESSION RECOVERY
-If KeyGo crashes or closes during an agent operation:
-RECOVERABLE SESSION
+Input
+8,421
 
-Project:
-MyApplication
+Output
+2,103
 
-Operation:
-Applying changes
+Total
+10,524
 
-Status:
-Interrupted
+Estimated Cost
+$0.034
 
-[Inspect]
-[Rollback]
-[Resume]
-[Discard]
+Budget
+$1.00
 
-Never silently resume an autonomous task after a crash.
+Remaining
+$0.966
 
-30. STOP AGENT
-Provide a highly visible:
-STOP AGENT
+Use actual Core usage data.
+Clearly distinguish:
+Exact provider usage
 
-It should attempt to cancel:
-AI streaming
-tool execution
-background work
-terminal processes
-agent loops
+from:
+Estimated usage
 
-Use cancellation tokens throughout the .NET architecture.
-Do not merely hide the UI while background work continues.
 
-31. SECURITY TEST SUITE
-Expand KeyGo.Core.Tests substantially.
-Test:
-Unauthorized file access
-Path traversal
-Unauthorized file deletion
-Unauthorized commands
-Unauthorized Git operations
-Credential leakage
-Secret exposure
-Budget bypass
-Agent cancellation
-Concurrent operations
-File conflicts
-Rollback
-Session recovery
+16. PRIVACY INDICATOR
+Make privacy state visible throughout the application.
+Examples:
+💻 LOCAL
+☁ CLOUD
+🔀 HYBRID
 
-Add integration tests for:
-Project → Context → AI
-AI → Tool
-Tool → Permission
-Permission → Approval
-Approval → File change
-File change → Test
-Test → Repair
-Repair → Verification
+The indicator should be accessible from:
 
-Use fake providers so tests do not require real API keys.
+chat
+agent
+model selector
+context inspector
+status bar
 
-32. PERFORMANCE REQUIREMENTS
-The UI must remain responsive during:
-Indexing
-AI streaming
-File scanning
-Build
-Tests
-Agent operations
 
-Use:
-async/await
-CancellationToken
-background workers
-streaming
-incremental indexing
-lazy loading
+17. SECURITY UI
+Create a Security section showing:
+SECURITY
 
-Do not perform large repository scans on the UI thread.
+Credentials
+✓ Stored securely
 
-33. OBSERVABILITY
-Use structured logging.
-Every agent operation should have:
-Correlation ID
-Session ID
-Project ID
-Operation ID
-
-Never log:
 API keys
-tokens
-passwords
-private keys
-full sensitive file contents
+✓ Local only
+
+Cloud requests
+✓ Direct provider connection
+
+Project secrets
+2 excluded
+
+Audit logging
+✓ Enabled
+
+Privacy mode
+OFF
+
+Do not claim a security property unless the backend actually enforces it.
+The UI must reflect reality.
+
+18. SETTINGS
+Create structured settings pages:
+General
+Appearance
+Providers
+Models
+Security
+Privacy
+Permissions
+Usage & Budgets
+Projects
+Agent
+Advanced
+
+Keep settings modular.
+
+19. THEMING
+Implement:
+Light
+Dark
+System
+
+Use WinUI resources/theme dictionaries.
+Do not scatter colors throughout code.
+Create centralized design resources for:
+
+typography
+spacing
+borders
+buttons
+cards
+icons
+semantic states
+status indicators
 
 
-34. UI ERROR HANDLING
-Errors should be understandable.
-Bad:
-HttpRequestException
+20. VIEWMODEL ARCHITECTURE
+Use a clean MVVM architecture.
+Recommended structure:
+KeyGo.App
+│
+├── Views
+├── ViewModels
+├── Controls
+├── Services
+├── Converters
+├── Resources
+├── Navigation
+└── Themes
 
-Better:
-Unable to connect to the AI provider.
+Do not put business logic inside code-behind.
+ViewModels should communicate with application/core services through interfaces.
+
+21. UI STATE MANAGEMENT
+Every major asynchronous operation should have explicit states:
+Idle
+Loading
+Streaming
+Success
+Error
+Cancelled
+
+Example:
+Connecting...
+
+Verifying credential...
+
+Discovering models...
+
+✓ Connected
+
+Never leave users staring at a frozen interface.
+
+22. ERROR EXPERIENCE
+Create consistent error presentation.
+Example:
+Unable to connect
+
+The provider rejected the request.
 
 Possible causes:
+
 • Invalid API key
-• Network unavailable
-• Provider outage
 • Model unavailable
+• Network failure
+• Provider service issue
 
 [Retry]
 [Connection Inspector]
 
-Technical details can be expandable.
+Technical diagnostics should be expandable.
 
-35. DEMO SCENARIO
-When this milestone is complete, verify the entire product using a real sample project.
-Scenario:
-Open a sample .NET project.
+23. KEYBOARD-FIRST EXPERIENCE
+Developer users should be able to operate KeyGo quickly.
+Implement shortcuts for common actions:
+Ctrl+K       Command/search
+Ctrl+P       Project/file search
+Ctrl+Enter   Send message
+Esc          Stop generation
+Ctrl+Shift+A Agent mode
+Ctrl+Shift+P Provider selector
 
-Ask:
+Avoid conflicts with standard Windows shortcuts.
 
-"Find why the authentication tests are failing."
-
-KeyGo should:
-✓ Analyze project
-✓ Find relevant files
-✓ Show context
-✓ Explain probable issue
-✓ Generate plan
-
-User:
-"Fix it."
-
-KeyGo:
-✓ Generate changes
-✓ Show diff
-
-User:
-Approve
-
-KeyGo:
-✓ Apply changes
-✓ Build
-✓ Run tests
-
-If tests fail:
-✓ Analyze failure
-✓ Generate proposed fix
-✓ Show diff
-
-User approves.
-Finally:
-✓ Tests pass
-✓ Final review
-✓ Session report
-
-
-36. FINAL SESSION REPORT
+24. COMMAND PALETTE
+Create a command palette architecture.
 Example:
-KEYGO SESSION REPORT
+Search commands...
 
-Goal:
-Fix authentication tests
+> Open Project
+> New Chat
+> Switch Model
+> Connect Provider
+> Run Agent
+> View Usage
+> Open Settings
+> Analyze Project
 
-Project:
-MyApplication
+Commands should be discoverable and extensible.
 
-Provider:
-OpenAI
+25. ACCESSIBILITY
+Use proper:
 
-Model:
-Model X
+keyboard navigation
+focus states
+semantic labels
+accessible names
+sufficient contrast
+screen-reader-friendly controls
 
-Files inspected:
-18
+Do not treat accessibility as a later feature.
 
-Files changed:
-3
+26. PERFORMANCE
+The frontend must remain responsive while:
 
-Lines added:
-34
+scanning projects
+indexing files
+streaming AI responses
+loading large conversations
+running builds
+running tests
+executing agent tools
 
-Lines removed:
-9
+Use:
 
-Build:
-✓ Passed
+async APIs
+cancellation tokens
+virtualization
+incremental updates
+background services
 
-Tests:
-49 passed
-0 failed
+Never block the UI thread with filesystem or process operations.
 
-AI tokens:
-14,832
+27. FRONTEND TESTING
+Add tests for:
+ViewModels
+ProviderConnectionViewModel
+ChatViewModel
+AgentViewModel
+ProjectViewModel
+UsageViewModel
 
-Estimated cost:
-$0.042
+Test:
 
-Duration:
-4m 32s
+loading
+success
+errors
+cancellation
+provider switching
+model switching
+permission state
+budget state
 
-Security warnings:
-0
+Add UI automation tests for the most important workflows where practical.
 
-Result:
-✓ COMPLETED
+28. DESIGN SYSTEM DOCUMENT
+Create:
+docs/ui-design-system.md
 
+Document:
 
-37. DO NOT OVERENGINEER THIS MILESTONE
-Do NOT spend this milestone implementing every future feature.
-Do NOT prioritize:
-Marketplace
-Voice
-Image generation
-Multi-agent company
-Autonomous software factory
-Laptop maintenance
-Browser automation
-Full IDE
-VS Code extension
-Complex vector database
-Dozens of AI providers
+layout principles
+typography
+spacing
+colors
+component rules
+navigation
+states
+accessibility
+responsive behavior
 
-unless an existing implementation can be reused with minimal effort.
-The goal is to make the current architecture actually usable.
+This prevents different AI developers from creating inconsistent interfaces.
 
-38. FUTURE-PROOF THE ARCHITECTURE
-Even though this milestone focuses on the coding workflow, preserve extension points for:
-Provider adapters
-Local models
-Model routing
-MCP
-Browser tools
-Computer tools
-Voice
-Vision
-VS Code
-GitHub
-Multi-agent orchestration
-Marketplace
+29. NO FAKE FUNCTIONALITY
+Do not make buttons appear functional when they are not.
+If a backend service is not implemented yet:
 
-Do not hardcode the agent specifically for one provider.
+create a clean interface
+show an appropriate unavailable state
+document the integration point
 
-39. DEFINITION OF DONE
-This milestone is complete only when KeyGo can demonstrate:
-REAL PROJECT
-     ↓
-PROJECT EXPLORER
-     ↓
-PROJECT CONTEXT
-     ↓
-CONNECTED MODEL
-     ↓
-STREAMING CHAT
-     ↓
-AGENT INVESTIGATION
-     ↓
-STRUCTURED PLAN
-     ↓
-USER APPROVAL
-     ↓
-PROPOSED CODE
-     ↓
-REAL DIFF
-     ↓
-USER APPROVAL
-     ↓
-SAFE FILE TRANSACTION
-     ↓
-BUILD
-     ↓
-TESTS
-     ↓
-FAILURE ANALYSIS
-     ↓
-CONTROLLED REPAIR
-     ↓
-VERIFICATION
-     ↓
-SESSION REPORT
+Do NOT fabricate provider responses, token counts, security statuses, or project results.
 
-And all of this must operate through:
-SECURITY
-+
-PERMISSIONS
-+
-AUDITING
-+
-COST CONTROL
-+
-LOCAL-FIRST CREDENTIALS
+30. INTEGRATION REQUIREMENT
+Where Core services already exist, connect them immediately.
+The frontend should consume real:
+Provider services
+Credential services
+Model discovery
+Routing
+Usage tracking
+Audit services
+Permission services
+Project services
 
+Do not recreate these systems inside KeyGo.App.
 
-40. PRODUCT MILESTONE
-When complete, update the project status from:
+31. END-TO-END FRONTEND DEMO
+The milestone is complete when a developer can launch KeyGo and perform:
+Open KeyGo
+ ↓
+Open project
+ ↓
+See project tree
+ ↓
+Connect provider
+ ↓
+Verify API key
+ ↓
+Discover models
+ ↓
+Select model
+ ↓
+Open chat
+ ↓
+Ask question
+ ↓
+Receive streaming response
+ ↓
+Start Agent
+ ↓
+Inspect context
+ ↓
+Receive proposed change
+ ↓
+Open diff
+ ↓
+Approve/reject
+ ↓
+View activity
+ ↓
+View token/cost information
 
-"Foundation for a secure multi-provider AI coding workspace"
+All major screens must be connected to the real architecture.
 
-to:
+32. FRONTEND DEFINITION OF DONE
+Do not consider the frontend complete merely because:
 
-"KeyGo Alpha — A functional local-first AI coding agent for Windows."
+"The UI looks good."
 
-The application should now be something that can be demonstrated to another developer without explaining that most features are still architectural plans.
-The most important objective is:
+It is complete when:
+UI
+ ↓
+ViewModel
+ ↓
+Application Service
+ ↓
+KeyGo.Core
+ ↓
+Real Provider / Local System
 
-Make one complete workflow excellent before making twenty workflows incomplete.
+works for the major workflow.
+The result should be a real KeyGo Alpha desktop application, not a UI mockup.
 
+FINAL PRINCIPLE
+KeyGo should now be developed as two parallel streams:
+             KEYGO
+               │
+       ┌───────┴────────┐
+       ↓                ↓
+   CORE/RUNTIME       FRONTEND
+       │                │
+ Providers          WinUI 3
+ Security           MVVM
+ Agents             UX
+ Context            Chat
+ Tools              Project UI
+ Usage              Diff UI
+       │                │
+       └───────┬────────┘
+               ↓
+        END-TO-END KEYGO
+
+The frontend team and backend team should integrate continuously rather than waiting for the entire backend to be finished.
