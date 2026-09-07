@@ -6,31 +6,32 @@ The repository was inspected across the current project structure:
 
 - src/
 - tests/
-- docs/
-- solution configuration
-- existing abstractions and services
-
-## What already works
+ OpenAI provider now performs authenticated model discovery, chat completion, and SSE streaming; other adapters remain prototype-level.
 
 - Solution and project scaffolding exist for a .NET Core Alpha application.
 - Core abstractions exist for provider management, model routing, credential storage, project services, usage tracking, permissions, and auditing.
-- Initial provider, model, routing, and usage services are in place.
-- Test project is configured with xUnit and is running.
-- The project compiles and tests pass in the current environment after the recent fixes.
-- Secure-style credential handling has been advanced to a local vault abstraction, with masking and metadata support.
-- The repository already contains strong architectural and security documentation.
-
-## Partially implemented
-
-- Provider adapter layer exists in concept but is not yet fully production-ready.
 - Model and capability metadata are partly modeled but not yet fully normalized against live provider output.
 - Conversation persistence exists at the service and model level, but not yet as a complete end-to-end UI/runtime workflow.
 - Credential storage has a vault abstraction, but it still needs a production Windows-native implementation rather than an in-memory or simple local-store approach.
-- The app shell exists as a minimal executable entry point, but there is no developer UI yet.
+ The current implementation now supports this executable path:
+
+ 1. Open and index a local project
+ 2. Search and assemble bounded, secret-filtered context
+ 3. Send context through a selected provider
+ 4. Consume streamed response text
+ 5. Persist the conversation and both chat messages
+
+ `KeyGo.App` exposes this path from the command line with:
+
+ ```text
+ KeyGo.App <project-folder> <question>
+ ```
+
+ OpenAI requests use the existing credential abstraction and authenticated `/v1/models` and `/v1/chat/completions` endpoints. The core test suite covers the path with an offline fake provider and deterministic HTTP stubs.
 
 ## Stubbed
 
-- Authentication, model discovery, and connection inspector workflows are still in a lightweight prototype stage.
+ The project is now at a verified headless vertical-slice stage: the repository builds, tests pass, and project context can reach a real OpenAI streaming endpoint through persisted chat. It is not yet the complete Windows workspace described by the product milestone.
 - Stream handling is implemented at a basic service level but not yet connected to a real UI or provider request pipeline.
 - Usage and cost tracking are present but are still not fully integrated with provider metadata and active chat sessions.
 - Project context retrieval and file filtering remain early-stage concepts.
