@@ -25,4 +25,17 @@ public sealed class InMemoryCredentialStore : ICredentialStore
         _credentials.Remove($"{provider}:{credentialName}");
         return Task.CompletedTask;
     }
+
+    public Task<IReadOnlyList<string>> ListCredentialNamesAsync(string provider, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var names = _credentials
+            .Keys
+            .Where(k => k.StartsWith($"{provider}:", StringComparison.OrdinalIgnoreCase))
+            .Select(k => k[(provider.Length + 1)..])
+            .ToList();
+
+        return Task.FromResult<IReadOnlyList<string>>(names);
+    }
 }

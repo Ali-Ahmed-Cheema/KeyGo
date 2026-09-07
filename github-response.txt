@@ -1,0 +1,10 @@
+Next implementation step
+The next required module is:
+
+provider verification and model discovery flow
+This is the feature that turns “stored key” into “verified, usable provider” and includes:
+
+validate credential
+detect model list
+mark verified vs unknown capability
+expose connection inspector results

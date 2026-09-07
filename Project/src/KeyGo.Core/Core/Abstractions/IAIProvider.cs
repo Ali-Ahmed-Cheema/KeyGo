@@ -1,9 +1,17 @@
+using KeyGo.Core.Models;
+
 namespace KeyGo.Core.Abstractions;
 
 public interface IAIProvider
 {
-    string ProviderName { get; }
-    Task<bool> ValidateAsync(CancellationToken cancellationToken = default);
-    Task<string> SendMessageAsync(string message, CancellationToken cancellationToken = default);
-    IAsyncEnumerable<string> StreamMessageAsync(string message, CancellationToken cancellationToken = default);
+    string Id { get; }
+    string DisplayName { get; }
+
+    Task<ProviderConnectionResult> ValidateAsync(CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<AIModel>> GetModelsAsync(CancellationToken cancellationToken = default);
+
+    Task<AIResponse> SendAsync(AIRequest request, CancellationToken cancellationToken = default);
+
+    IAsyncEnumerable<AIStreamEvent> StreamAsync(AIRequest request, CancellationToken cancellationToken = default);
 }

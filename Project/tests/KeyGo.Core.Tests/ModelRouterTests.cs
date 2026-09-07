@@ -1,6 +1,7 @@
 using KeyGo.Core.Abstractions;
 using KeyGo.Core.Models;
 using KeyGo.Core.Services;
+using Xunit;
 
 namespace KeyGo.Core.Tests;
 
