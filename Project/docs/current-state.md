@@ -125,3 +125,19 @@ The repository currently contains a promising architecture scaffold and a few ea
 The repository now also contains a working first project-engine slice in `ProjectWorkspaceService` and `ProjectContextService`. It can open a local folder, detect technology evidence, index allowed text files, classify files, search with line references, reject path traversal, enforce a context budget, block likely secret-bearing files, and enforce local-only privacy mode. The app shell accepts a folder path argument and displays basic index information.
 
 The remaining claims above should be read as the broader roadmap; they are not yet implemented by this slice.
+
+## Coding agent update
+
+The next milestone foundation is now present:
+
+- explicit agent states and observable activity entries
+- structured plans with tools, expected files, risks, operation estimates, and approval state
+- provider-neutral investigation orchestration using the existing project/context services
+- default Observe permissions with explicit session grants for higher-risk capabilities
+- tool descriptors with required permission and risk level
+- approval-gated unified diff review
+- project-root validation and stale-proposal protection for file changes
+- temporary-file writes with rollback on failure
+- command risk classification without command execution
+
+The desktop UI, real tool adapters for Git/terminal/symbols, persistent snapshots, test execution, crash recovery, and provider-backed plan/change generation remain future work.
