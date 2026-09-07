@@ -1,0 +1,1076 @@
+KEYGO — LARGE IMPLEMENTATION SPRINT
+Project Workspace + Repository Intelligence + Context Engine + Read-Only Coding Agent
+Mission
+KeyGo currently has an early-stage .NET foundation for:
+
+Local-first AI
+Provider abstraction
+Provider routing
+Secure credential handling
+Usage/cost tracking
+Permissions
+Desktop application
+Testing
+Architecture/security documentation
+
+The next objective is to transform KeyGo from a provider/API workspace into a real developer workspace.
+Build a large, integrated vertical slice covering:
+Open Project
+      ↓
+Understand Project
+      ↓
+Index Repository
+      ↓
+Analyze Structure
+      ↓
+Search Code
+      ↓
+Build Context
+      ↓
+Ask AI About Project
+      ↓
+AI Explains Project
+
+The AI must initially operate in READ-ONLY mode.
+Do NOT implement unrestricted autonomous editing yet.
+
+1. INSPECT THE EXISTING CODEBASE FIRST
+Before writing code:
+Inspect:
+src/
+tests/
+docs/
+database/
+desktop application
+runtime
+provider layer
+security layer
+permission system
+existing models
+existing services
+
+Determine:
+What already exists?
+What should be reused?
+What should be extended?
+What is duplicated?
+What is incomplete?
+
+Do not rewrite working architecture simply to introduce a different design.
+Update:
+docs/implementation-status.md
+
+
+2. PROJECT WORKSPACE
+Implement the concept of a KeyGo Project.
+A project represents a local folder/repository.
+Example:
+KeyGo
+│
+├── Projects
+│
+│   └── MyReactApp
+│       ├── Path
+│       ├── Git information
+│       ├── Index status
+│       ├── Last analyzed
+│       └── Health status
+
+Users must be able to:
+Open Project
+Open Recent Project
+Remove Project
+Refresh Project
+Re-index Project
+
+Do not copy the entire project into KeyGo.
+The project remains at its original location.
+
+3. "OPEN WITH KEYGO"
+Prepare KeyGo to support:
+Right click folder
+      ↓
+Open with KeyGo
+
+The application should accept a folder path as an application argument.
+Example concept:
+KeyGo.exe "C:\Projects\MyApp"
+
+On startup:
+Detect folder
+      ↓
+Create/Open KeyGo project
+      ↓
+Analyze project
+
+
+4. PROJECT DETECTION
+When a project opens, detect its technology.
+Examples:
+package.json        → Node.js
+*.csproj            → .NET
+*.sln               → .NET solution
+requirements.txt    → Python
+pyproject.toml      → Python
+Cargo.toml          → Rust
+pom.xml             → Java
+build.gradle        → Java/Gradle
+CMakeLists.txt      → C/C++
+Makefile            → Make
+vite.config.*       → Vite
+next.config.*       → Next.js
+
+The detection engine should be extensible.
+Example:
+PROJECT DETECTION
+
+Project:
+MyApplication
+
+Detected:
+
+✓ C#
+✓ .NET
+✓ Git
+✓ SQLite
+
+Possible frameworks:
+
+✓ ASP.NET Core
+✓ Entity Framework Core
+
+Never claim a framework simply because a filename looks similar.
+Use actual evidence.
+
+5. PROJECT STRUCTURE ANALYZER
+Build a project tree.
+Example:
+MY PROJECT
+
+📁 src
+   📁 components
+   📁 services
+   📁 models
+📁 tests
+📁 docs
+📄 package.json
+📄 README.md
+📄 .gitignore
+
+The analyzer should understand:
+Files
+Directories
+Extensions
+Project files
+Configuration files
+Test directories
+Documentation
+Git metadata
+
+
+6. SMART FILE FILTERING
+Do NOT index everything blindly.
+Default exclusions:
+.git
+node_modules
+bin
+obj
+dist
+build
+.cache
+coverage
+venv
+__pycache__
+
+Allow user configuration:
+Ignored directories
+Ignored extensions
+Maximum file size
+Binary file handling
+Generated files
+
+Never send excluded files to an AI provider.
+
+7. FILE CLASSIFICATION
+Classify files:
+SOURCE
+TEST
+CONFIGURATION
+DOCUMENTATION
+DATA
+ASSET
+GENERATED
+BINARY
+UNKNOWN
+
+Examples:
+Program.cs       → SOURCE
+AuthService.cs   → SOURCE
+AuthTests.cs     → TEST
+README.md        → DOCUMENTATION
+appsettings.json → CONFIGURATION
+logo.png         → ASSET
+
+
+8. LOCAL CODE INDEX
+Implement a local project index.
+The index should support:
+File lookup
+Text search
+Symbol lookup
+Path lookup
+Language filtering
+
+The first version does NOT need a sophisticated vector database.
+Start with a reliable local index.
+Potential technologies:
+SQLite
+SQLite FTS5
+Roslyn for C#
+
+For other languages, design adapters.
+
+9. ROSLYN INTEGRATION
+Because KeyGo is C#/.NET-based, use Roslyn where appropriate.
+Extract:
+Namespaces
+Classes
+Interfaces
+Methods
+Properties
+Fields
+References
+Inheritance
+Attributes
+
+Example:
+AuthService.cs
+
+Class:
+AuthService
+
+Methods:
+Login()
+Logout()
+ValidateToken()
+
+Dependencies:
+UserRepository
+TokenService
+
+Do not create a fragile regex-only parser for C#.
+Use the language's actual parser/compiler infrastructure.
+
+10. SYMBOL SEARCH
+Implement:
+Search symbols
+
+Example:
+Search:
+AuthService
+
+Results:
+
+AuthService
+src/Services/AuthService.cs
+
+References:
+LoginController
+UserController
+AuthMiddleware
+
+Support:
+Class
+Method
+Interface
+Function
+Property
+Variable
+
+depending on language capabilities.
+
+11. CODE SEARCH
+Implement fast local search.
+User:
+Search:
+JWT authentication
+
+KeyGo returns relevant files/code.
+Example:
+AUTHENTICATION
+
+src/Auth/AuthService.cs
+src/Middleware/AuthMiddleware.cs
+src/Controllers/LoginController.cs
+
+Show:
+File
+Line number
+Relevant snippet
+
+
+12. PROJECT SUMMARY ENGINE
+After indexing:
+Generate a structured local summary.
+Example:
+PROJECT SUMMARY
+
+Name:
+ShopAPI
+
+Technology:
+ASP.NET Core
+
+Languages:
+C#
+
+Structure:
+Backend API
+
+Components:
+Authentication
+Products
+Orders
+Database
+
+Database:
+SQLite
+
+Testing:
+xUnit
+
+Git:
+✓ Repository detected
+
+Important:
+The summary should be based on actual project evidence.
+Do not hallucinate architecture.
+
+13. DEPENDENCY ANALYSIS
+Detect dependencies.
+Examples:
+.NET:
+NuGet
+
+Node:
+npm/package.json
+
+Python:
+pip/requirements
+
+Rust:
+Cargo
+
+Java:
+Maven/Gradle
+
+Show:
+Dependencies:
+47
+
+Production:
+32
+
+Development:
+15
+
+Where possible detect:
+Version
+Declared dependency
+Lock file
+
+Do not yet promise vulnerability detection unless a reliable vulnerability source/tool is actually integrated.
+
+14. GIT INTEGRATION — READ ONLY
+Detect Git.
+Show:
+GIT
+
+Branch:
+main
+
+Status:
+Clean
+
+Last commit:
+2 hours ago
+
+Modified files:
+0
+
+If modified:
+3 modified files
+2 untracked files
+
+Also support read-only:
+Commit history
+Branches
+Changed files
+Diff inspection
+
+Do NOT automatically:
+commit
+push
+pull
+reset
+checkout
+delete branches
+
+Those belong to a later permission-controlled milestone.
+
+15. PROJECT CONTEXT ENGINE
+This is one of the most important parts of this milestone.
+Do NOT send the entire repository to the AI for every question.
+Build:
+KeyGo Context Engine
+User Question
+      ↓
+Understand intent
+      ↓
+Search project
+      ↓
+Find relevant files
+      ↓
+Find relevant symbols
+      ↓
+Build context
+      ↓
+Send only relevant context
+      ↓
+AI
+
+Example:
+User:
+Why is login failing?
+
+KeyGo should search:
+LoginController
+AuthService
+AuthMiddleware
+TokenService
+UserRepository
+configuration
+relevant tests
+
+instead of blindly sending the entire repository.
+
+16. CONTEXT BUDGET
+The context engine must consider:
+Model context limit
+Token budget
+File relevance
+Conversation history
+User prompt
+
+Example:
+CONTEXT
+
+User prompt             200 tokens
+Relevant files        5,200 tokens
+Conversation           1,100 tokens
+Project metadata         300 tokens
+------------------------------------
+Total                  6,800 tokens
+
+If the context is too large:
+Rank files
+      ↓
+Remove low-relevance content
+      ↓
+Keep important symbols
+      ↓
+Summarize where appropriate
+
+This directly connects with KeyGo's cost-management vision.
+
+17. CONTEXT INSPECTOR
+Users should be able to see what KeyGo is giving the AI.
+Example:
+CONTEXT USED
+
+✓ AuthService.cs
+✓ LoginController.cs
+✓ AuthMiddleware.cs
+✓ TokenService.cs
+✓ LoginTests.cs
+
+Excluded:
+
+○ ProductService.cs
+○ PaymentService.cs
+○ UI components
+
+Show:
+Estimated tokens:
+7,420
+
+Allow:
+[View Context]
+
+This is a major transparency feature.
+
+18. PROJECT CHAT
+Implement:
+Ask My Project
+Example:
+┌─────────────────────────────────────┐
+│ ASK MY PROJECT                      │
+├─────────────────────────────────────┤
+│ Why is authentication failing?      │
+│                                     │
+│                         [Send]      │
+└─────────────────────────────────────┘
+
+KeyGo:
+Searching project...
+      ↓
+Finding relevant files...
+      ↓
+Building context...
+      ↓
+Sending context to selected model...
+
+Then response:
+I found the likely issue in AuthMiddleware.cs.
+
+The middleware validates the token before...
+
+Citations should point back to:
+AuthMiddleware.cs:42
+
+
+19. CODE REFERENCES IN AI RESPONSES
+When the AI refers to a file:
+AuthService.cs
+
+make it clickable.
+Click:
+AuthService.cs:42
+
+opens the local file in KeyGo.
+If VS Code integration exists later, this can also open:
+VS Code → file → line
+
+For now, implement KeyGo's internal navigation.
+
+20. READ-ONLY CODING AGENT
+Introduce:
+Coding Agent — Observe Mode
+The agent can:
+Read files
+Search project
+Analyze code
+Inspect Git status
+Inspect dependencies
+Inspect project structure
+
+It cannot:
+Modify files
+Delete files
+Run arbitrary commands
+Install software
+Commit
+Push
+Deploy
+
+Permission engine must enforce this.
+Do not rely solely on UI restrictions.
+
+21. AGENT TOOL SYSTEM
+Create a controlled tool abstraction.
+Example:
+IProjectTool
+
+ReadFile
+SearchFiles
+SearchSymbols
+GetProjectTree
+GetGitStatus
+GetGitDiff
+GetDependencies
+
+Tools should return structured results.
+Example:
+Tool:
+ReadFile
+
+Path:
+src/Auth/AuthService.cs
+
+Result:
+...
+
+
+22. TOOL PERMISSIONS
+Create permission declarations:
+Tool                    Observe
+─────────────────────────────────
+ReadFile                  ✓
+SearchFiles               ✓
+SearchSymbols             ✓
+GitStatus                 ✓
+GitDiff                   ✓
+
+WriteFile                 ✗
+DeleteFile                ✗
+Terminal                  ✗
+GitCommit                 ✗
+GitPush                   ✗
+
+The permission engine must be the actual enforcement layer.
+
+23. AGENT ACTIVITY LOG
+Show:
+KEYGO AGENT
+
+✓ Searching project
+✓ Reading AuthService.cs
+✓ Reading LoginController.cs
+✓ Searching Login references
+✓ Analyzing authentication flow
+
+No files modified.
+
+Users should always understand what the agent is doing.
+
+24. AI SOURCE REFERENCES
+AI responses should ideally contain references:
+Authentication is handled in:
+
+1. AuthService.cs:28
+2. AuthMiddleware.cs:51
+3. LoginController.cs:17
+
+Where the model's response cannot be reliably grounded, label the statement accordingly.
+Do not fabricate source locations.
+
+25. PROJECT CHAT MEMORY
+Project conversations should retain:
+Project
+Conversation
+Messages
+Selected model
+Usage
+Context references
+
+A project chat belongs to a project.
+Example:
+MyProject
+ ├── General Chat
+ ├── Authentication
+ ├── Bug Investigation
+ └── Architecture
+
+
+26. MULTIPLE PROJECTS
+KeyGo must support:
+Project A
+Project B
+Project C
+
+Switching project should change:
+File context
+Index
+Git information
+Project settings
+Project conversations
+
+Never accidentally send Project A files while the user is working inside Project B.
+
+27. SECURITY BOUNDARY
+This milestone must enforce:
+Project A context
+      ↓
+Project A AI request
+
+and never:
+Project A + Project B
+      ↓
+AI
+
+unless the user explicitly creates a multi-project context.
+
+28. LARGE FILE HANDLING
+Do not blindly load massive files.
+For example:
+500 MB log file
+
+should not be read entirely into memory.
+Implement:
+Size limits
+Streaming reads
+Partial reads
+Line ranges
+Binary detection
+
+Example:
+File too large to display completely.
+
+[Read first 500 lines]
+[Search within file]
+
+
+29. SECRET DETECTION
+Before sending project context to a cloud model, inspect relevant files for likely secrets.
+Detect patterns such as:
+API keys
+Private keys
+Tokens
+Passwords
+Connection strings
+.env values
+Credentials
+
+If detected:
+⚠ POSSIBLE SECRET DETECTED
+
+.env
+API_KEY=...
+
+This file will NOT be sent.
+
+[Review]
+
+Never send the secret to the AI merely to ask whether it is a secret.
+Use local detection.
+
+30. PRIVACY MODE
+Implement project-level:
+☁ Cloud AI
+💻 Local AI
+🔀 Hybrid
+
+For:
+LOCAL ONLY
+
+the context engine must refuse cloud requests.
+Example:
+PRIVATE PROJECT
+
+Cloud AI disabled.
+
+Only local models can access this project.
+
+
+31. PROJECT SETTINGS
+Add:
+Project Settings
+
+AI Model
+Context limits
+Ignored directories
+Ignored files
+Privacy mode
+Auto-index
+Git integration
+Secret scanning
+
+
+32. INDEX STATUS UI
+Show:
+PROJECT INDEX
+
+Status:
+✓ Ready
+
+Files:
+1,842
+
+Source files:
+624
+
+Symbols:
+18,420
+
+Last indexed:
+2 minutes ago
+
+[Re-index]
+
+During indexing:
+Indexing project...
+
+1,024 / 1,842
+
+████████████░░░░
+
+Do not freeze the UI.
+
+33. BACKGROUND INDEXING
+Indexing must happen asynchronously.
+The UI must remain responsive.
+Use appropriate .NET background/task architecture.
+Support:
+Start
+Pause if practical
+Cancel
+Resume/retry
+
+Do not create unnecessary background processes.
+
+34. FILE CHANGE DETECTION
+Prepare incremental indexing.
+When a file changes:
+AuthService.cs changed
+      ↓
+Re-index only changed file
+      ↓
+Update symbols
+      ↓
+Update search index
+
+Do not re-index the entire repository after every edit.
+
+35. PROJECT HEALTH — FIRST VERSION
+Do not build the entire Project Doctor yet.
+Build the foundation.
+Calculate basic metrics:
+Files
+Source files
+Test files
+Documentation files
+Large files
+TODO count
+Git state
+Dependency count
+
+Display:
+PROJECT SNAPSHOT
+
+Files:          1,842
+Source:           624
+Tests:            118
+Documentation:     42
+TODOs:             37
+Large files:       12
+Git:            Clean
+
+Label this:
+Project Snapshot
+
+not a complete health score.
+
+36. PERFORMANCE REQUIREMENTS
+Measure:
+Startup time
+Project open time
+Indexing speed
+Search latency
+Symbol lookup latency
+Context-building latency
+Memory consumption
+
+Avoid loading the entire repository into RAM.
+The index should be persistent.
+Create:
+docs/performance-baseline.md
+
+
+37. TESTING
+Create unit tests for:
+Project detection
+File classification
+Ignore rules
+Project indexing
+Search
+Symbol extraction
+Context ranking
+Context limits
+Secret detection
+Permission enforcement
+Git inspection
+
+Integration tests:
+Open project
+Index project
+Search project
+Ask project question
+Persist conversation
+Restart application
+Reload project
+
+Security tests:
+Credential isolation
+Project isolation
+Secret filtering
+Permission bypass attempts
+Path traversal
+Unauthorized file access
+
+
+38. PATH SECURITY
+The project engine must protect against:
+../
+symbolic links where unsafe
+unexpected path traversal
+access outside project root
+
+Normalize and validate paths.
+A tool requesting:
+../../Users/...
+
+must be rejected unless explicitly authorized by a future system-level permission.
+
+39. NO SILENT DATA EXFILTRATION
+Every cloud AI request should be traceable to:
+User prompt
+Selected provider
+Selected model
+Context files
+Token estimate
+Privacy mode
+
+The UI should make it possible to inspect:
+What was sent?
+
+without exposing secrets.
+
+40. VS CODE PREPARATION
+Do not build the complete VS Code extension in this milestone.
+But create an integration interface:
+IExternalEditorIntegration
+
+with future operations:
+OpenFile
+OpenFileAtLine
+OpenProject
+
+Implement a basic Windows-compatible editor launch if appropriate.
+Prepare for future:
+VS Code extension
+Cursor integration
+Other editors
+
+without coupling the core runtime to VS Code.
+
+41. DOCUMENTATION
+Update:
+docs/architecture.md
+docs/security.md
+docs/permissions.md
+docs/project-engine.md
+docs/context-engine.md
+docs/providers.md
+docs/current-state.md
+
+Add:
+docs/project-tool-api.md
+
+Document:
+Tool
+Purpose
+Inputs
+Outputs
+Permission required
+Security considerations
+
+
+42. DEFINITION OF DONE
+A fresh developer should be able to:
+1. Launch KeyGo
+
+2. Click:
+   Open Project
+
+3. Select:
+   A real software repository
+
+4. KeyGo detects:
+   language
+   framework
+   Git
+   project files
+
+5. KeyGo indexes the project
+
+6. User sees:
+   project tree
+   index status
+   project summary
+
+7. User opens:
+   Ask My Project
+
+8. User asks:
+
+   "Where is authentication implemented?"
+
+9. KeyGo searches the repository
+
+10. KeyGo identifies relevant files
+
+11. KeyGo builds a limited context
+
+12. KeyGo sends only that context
+    to the selected AI provider
+
+13. AI answers with file references
+
+14. User clicks a reference
+
+15. KeyGo opens the file
+
+16. User can inspect:
+    Context Used
+
+17. Usage and token estimates are recorded
+
+18. User restarts KeyGo
+
+19. Project and conversation remain available
+
+20. No project files are modified.
+
+
+43. SUCCESS CRITERIA
+This sprint succeeds when KeyGo can honestly demonstrate:
+
+"KeyGo understands my project without uploading my entire repository blindly."
+
+The core architecture should now look like:
+                         KEYGO
+                           │
+             ┌─────────────┴─────────────┐
+             ↓                           ↓
+       AI Runtime                 Project Engine
+             │                           │
+       Provider Layer             Repository Index
+             │                           │
+       Model Selection             Code Search
+             │                           │
+       Usage Tracking              Symbol Engine
+             │                           │
+       Secure Keys                 Context Engine
+             │                           │
+             └─────────────┬─────────────┘
+                           ↓
+                     Project Chat
+                           ↓
+                  Read-Only Agent
+
+
+44. NEXT ARCHITECTURAL FOUNDATION
+After this milestone, KeyGo will be ready for the next major leap:
+READ-ONLY AGENT
+      ↓
+PLAN
+      ↓
+PROPOSE CHANGES
+      ↓
+SHOW DIFF
+      ↓
+USER APPROVES
+      ↓
+EDIT FILES
+      ↓
+RUN TESTS
+      ↓
+VERIFY
+      ↓
+ROLLBACK IF NECESSARY
+
+That should become the next major implementation phase.
+Do not skip the approval/diff architecture.
+The goal is not simply to make KeyGo autonomous.
+The goal is to make KeyGo:
+Powerful + Observable + Permission-controlled + Reversible.
