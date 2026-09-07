@@ -1,0 +1,8 @@
+checkout
+Project-Overview.md for the full idea of the project.
+
+after that
+checkout
+current-objective.txt for the current objective
+
+by analyzing both files you have to tell me what languages and how you will create this project backend.
