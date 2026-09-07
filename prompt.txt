@@ -1,1125 +1,873 @@
-KEYGO — MASTER ARCHITECTURE & DEVELOPMENT PROMPT
+KEYGO — CORE ALPHA DEVELOPMENT SPRINT
 Role
-You are the Lead Software Architect and Principal Engineer for a serious open-source Windows AI development platform called KeyGo.
-Your responsibility is not simply to generate code.
-You must help design and build a production-quality, secure, modular, maintainable, high-performance application that can evolve over several years without requiring a complete rewrite.
-You are working as part of an AI-assisted software engineering team. Other AI agents may work on different modules, so architectural boundaries and contracts are extremely important.
-Do not make short-term implementation decisions that damage the long-term architecture.
+You are the KeyGo engineering team.
+The existing KeyGo repository already contains a .NET/C# prototype with:
 
-1. Product
-Name
-KeyGo
-Vision
+provider abstraction
+model routing
+local credential architecture
+usage tracking
+auditing
+permission-aware project operations
+desktop application shell
+SQLite-related infrastructure
+documentation
+initial routing tests
 
-One Developer. Any AI. Full Control.
+Do NOT rewrite the existing architecture blindly.
+First inspect the current repository and understand what is already implemented.
+Your objective in this sprint is to transform the current prototype into a functional, testable KeyGo Core Alpha.
 
-KeyGo is a local-first AI development environment for Windows.
-It allows developers to connect their own AI providers and API keys, use multiple models, work directly with local projects, run AI coding agents, use local/open-source models, intelligently route tasks between models, monitor token/cost usage, personalize AI behavior, and eventually allow controlled AI interaction with the user's computer.
-KeyGo should not be treated as merely a BYOK chat application.
-The long-term goal is to create an AI-native software development environment.
+1. Primary Objective
+At the end of this sprint, a developer should be able to:
+Install KeyGo
+    ↓
+Open KeyGo
+    ↓
+Add an AI provider
+    ↓
+Securely enter an API key
+    ↓
+Verify the credential
+    ↓
+Discover available models
+    ↓
+Select a model
+    ↓
+Send a message
+    ↓
+Receive a streaming response
+    ↓
+See the conversation
+    ↓
+Close KeyGo
+    ↓
+Reopen KeyGo
+    ↓
+Conversation remains available
 
-2. Core Product Principles
-The architecture MUST follow these principles:
-Local-first
-User credentials, project files, chat history, preferences, and sensitive data should remain on the user's device unless the user explicitly chooses otherwise.
-Privacy-first
-API keys must never be sent to KeyGo's own servers.
-When using cloud AI, the application should communicate directly with the configured provider whenever technically possible.
-Security-first
-AI models must never receive unrestricted control over the user's computer.
-AI requests actions.
-KeyGo authorizes actions.
-The operating system executes authorized actions.
-Provider-neutral
-KeyGo must not be architecturally dependent on one AI company.
-Model-neutral
-The user should be able to switch models without losing their KeyGo environment, preferences, project context, or conversation history.
-Capability-aware
-Never assume that all AI models support the same capabilities.
-Modular
-Every major subsystem must have a clear interface.
-Observable
-Agent actions, provider requests, errors, permissions, costs, and important decisions should be inspectable.
-Human-controlled
-The user remains the final authority for sensitive and irreversible operations.
-Performance-oriented
-KeyGo should be lightweight, responsive, asynchronous, and efficient with RAM/CPU/network resources.
+Then:
+Open Project
+    ↓
+Select project folder
+    ↓
+KeyGo understands project structure
+    ↓
+Ask question about project
+    ↓
+Relevant project context is supplied to AI
 
-3. Technology Baseline
-Use modern, currently supported technologies.
-Primary language
-C#
-Runtime
-.NET 10 LTS
-Do NOT use .NET 8 as the primary target for this new project unless a specific compatibility requirement is documented.
-Use the latest supported .NET 10 patch/SDK available when building.
-Use modern C# features supported by the selected .NET SDK.
-Do not blindly target preview frameworks for production.
-.NET 11 may be evaluated experimentally, but production KeyGo should remain on a supported LTS baseline unless the team explicitly approves otherwise.
-Desktop UI
-Preferred:
-WinUI 3
-Alternative:
-WPF only if a concrete technical reason exists.
-Do not introduce both UI frameworks unnecessarily.
-Database
-SQLite
-Use:
-Entity Framework Core where it provides value.
-Do not use SQLite as a repository for raw project source files.
-Store project paths and indexes/metadata instead.
-HTTP
-Use modern:
-HttpClient
-with proper:
+The entire workflow must remain local-first.
 
-cancellation
-timeouts
-connection reuse
-retry policies where appropriate
-streaming
-error handling
+2. IMPORTANT — FIRST ACTION
+Before writing substantial code:
+Inspect the existing repository.
+Determine:
 
-AI Streaming
-Support provider-specific mechanisms such as:
+What is already implemented?
+What is only a stub?
+What is partially implemented?
+Which architecture decisions are already established?
+Which interfaces already exist?
+Which tests already exist?
+Which dependencies are currently installed?
+Which components need refactoring?
+Which components can be reused?
+Which components are technically incorrect?
 
-Server-Sent Events
-HTTP streaming
-WebSockets where required
+Create:
+docs/current-state.md
 
-Do not assume every provider uses the same protocol.
-Logging
-Serilog
-Use structured logging.
-Never log:
+containing:
+Implemented
+Partially implemented
+Stubbed
+Missing
+Needs refactoring
+Technical risks
+Recommended next steps
 
-API keys
-access tokens
-passwords
-secrets
-private credentials
-sensitive project contents unnecessarily
+Do not duplicate functionality that already exists.
 
-Background processing
-Use modern .NET asynchronous patterns:
+3. Core Alpha Architecture
+Preserve the separation:
+KeyGo.App
+     ↓
+KeyGo.Runtime
+     ↓
+KeyGo.AI
+     ↓
+KeyGo.Providers
+     ↓
+Provider API
 
-async/await
-CancellationToken
-BackgroundService where appropriate
-Channels where useful
-Task-based concurrency
+Supporting services:
+KeyGo.Security
+KeyGo.Storage
+KeyGo.Projects
+KeyGo.Usage
+KeyGo.Audit
+KeyGo.Permissions
 
-Avoid unnecessary threads.
-Testing
-Use a modern .NET testing framework such as:
-xUnit
-Include:
+The UI must not directly implement provider-specific API logic.
 
-unit tests
-integration tests
-security tests
-provider tests
-agent/tool tests
-regression tests
-
-Packaging
-Target:
-MSIX / Microsoft Store
-Also support direct installation from the official KeyGo website.
-
-4. High-Level Architecture
-Use a modular architecture similar to:
-                         KEYGO
-                           │
-                    ┌──────┴──────┐
-                    │   KeyGo UI  │
-                    └──────┬──────┘
-                           │
-                    Application Layer
-                           │
-                    KeyGo Runtime
-                           │
-       ┌───────────────────┼───────────────────┐
-       ↓                   ↓                   ↓
- Model Router         Agent Engine       Project Engine
-       │                   │                   │
-       └───────────────────┼───────────────────┘
-                           ↓
-                    Core Abstractions
-                           │
-        ┌──────────────────┼───────────────────┐
-        ↓                  ↓                   ↓
- Provider System     Security System      Storage System
-        │                  │                   │
-        ↓                  ↓                   ↓
- OpenAI/Google/etc.   Credentials       SQLite
-                      Permissions
-                      Policies
-                           │
-                           ↓
-                     Tool System
-                           │
-              ┌────────────┼────────────┐
-              ↓            ↓            ↓
-           Files        Terminal       Git
-              │            │            │
-              └────────────┼────────────┘
-                           ↓
-                      User Computer
-
-
-5. Core Interfaces
-Before implementing large features, define stable interfaces.
-At minimum consider:
-IAIProvider
-IModel
-IModelCapability
-IAgent
-ITool
-IToolExecutor
-IPermissionService
-IPolicyEngine
-ICredentialStore
-IProjectService
-IProjectIndexer
-IUsageTracker
-ICostEstimator
-IModelRouter
-IConversationService
-IMemoryService
-IAuditLogger
-
-Do not create interfaces merely for the sake of having interfaces.
-Use abstractions where they provide real architectural value.
-Document each major interface.
-
-6. Provider Architecture
-KeyGo must support multiple providers.
-Initial providers may include:
-
+4. Real Provider System
+Implement the first production-quality provider adapters.
+Start with:
+Provider 1
 OpenAI
+Provider 2
 Google Gemini
+Provider 3
 Anthropic
+After those are stable, make sure the architecture can support:
+
 DeepSeek
 Mistral
 xAI
 OpenRouter
-other compatible providers
+OpenAI-compatible providers
+future providers
 
-Also support:
-OpenAI-compatible/custom endpoints
-Provider architecture:
-IAIProvider
-    │
-    ├── OpenAIProvider
-    ├── GoogleProvider
-    ├── AnthropicProvider
-    ├── DeepSeekProvider
-    ├── MistralProvider
-    ├── XAIProvider
-    ├── OpenRouterProvider
-    └── OpenAICompatibleProvider
+Do not hard-code provider-specific assumptions into the core runtime.
 
-Adding a provider should NOT require rewriting the core runtime.
+5. Provider Interface
+Review and improve the existing provider abstraction.
+A provider should expose capabilities similar to:
+public interface IAIProvider
+{
+    string Id { get; }
 
-7. Capability System
-Do NOT assume every model supports every AI operation.
-Represent capabilities explicitly.
-Examples:
-TextGeneration
-Streaming
-Vision
-ImageGeneration
-AudioInput
-AudioOutput
-ToolCalling
-StructuredOutput
-Embeddings
-Reasoning
-LongContext
-CodeExecution
+    Task<ProviderConnectionResult> ValidateAsync(
+        CancellationToken cancellationToken);
 
-Each model should expose its known capabilities.
-Example:
-Model X
+    Task<IReadOnlyList<AIModel>> GetModelsAsync(
+        CancellationToken cancellationToken);
 
-Text              ✓
-Streaming         ✓
-Vision            ✓
-Tool Calling      ✓
-Image Generation  ✗
-Audio Input       ✗
+    Task<AIResponse> SendAsync(
+        AIRequest request,
+        CancellationToken cancellationToken);
 
-The UI and router should use this information.
+    IAsyncEnumerable<AIStreamEvent> StreamAsync(
+        AIRequest request,
+        CancellationToken cancellationToken);
+}
 
-8. API Key Security
-API keys are extremely sensitive.
-Implement:
-ICredentialStore
-        │
-        ├── Windows Credential Manager
-        └── DPAPI-backed protection where appropriate
+Adapt this to the existing architecture rather than blindly copying it.
+The interface must remain provider-neutral.
 
-Never store raw API keys in:
-config.json
-SQLite
-logs
-telemetry
-Git
-crash reports
+6. Streaming
+Streaming is a high-priority feature.
+The UI should display responses progressively:
+AI:
+Analyzing your project...
 
-The database should store references/metadata rather than plaintext credentials.
+then:
+AI:
+Analyzing your project structure...
+I found...
+
+rather than waiting for the entire response.
+Requirements:
+
+cancellation
+timeout handling
+network interruption handling
+partial-response handling
+clean stream termination
+UI responsiveness
+
+The user must be able to press:
+Stop generating
+
+7. API Key Security
+Implement the real credential storage mechanism.
+For Windows:
+Prefer:
+Windows Credential Manager
+
+and/or:
+DPAPI
+
+depending on the final security design.
+The exact mechanism must be documented.
+NEVER store:
+API keys in SQLite
+API keys in JSON
+API keys in logs
+API keys in source code
+API keys in environment files committed to Git
+
+The database should store credential metadata/identifiers only.
 Example:
 Provider: OpenAI
-CredentialId: credential_123
+CredentialId: abc123
+Created: ...
+LastUsed: ...
 
-NOT:
-apiKey: "sk-..."
+Never:
+ApiKey: sk-xxxxxxxx
 
-Keys must never be included in prompts.
-Keys must never be exposed to AI agents as ordinary tool-readable files.
 
-9. API Key Verification
-KeyGo must have a strong Provider & Model Verification Engine.
-When a user adds a key:
-API Key
-   ↓
-Provider authentication
-   ↓
-Endpoint validation
-   ↓
-Model availability
-   ↓
-Capability discovery
-   ↓
-Basic test request
-   ↓
-Verification report
+8. Credential Lifecycle
+Implement:
+Add credential
+View provider
+Test credential
+Use credential
+Replace credential
+Forget credential
+Delete credential
+
+The UI should never display the complete API key after initial entry.
+Show something like:
+OpenAI
+
+••••••••••••7K2P
+
+Connected ✓
+
+
+9. Connection Inspector
+This is one of KeyGo's signature features.
+Create:
+KEYGO CONNECTION INSPECTOR
+After adding an API key:
+Provider
+Authentication
+Endpoint
+Model discovery
+Streaming
+Tool calling
+Vision
+Image generation
+Audio
+Token information
 
 Example:
-API VERIFICATION
+CONNECTION INSPECTOR
 
-Provider: ______
-Credential: Valid ✓
+Provider
+OpenAI                         ✓
 
-Requested Model:
-________
+Authentication
+Valid                          ✓
 
-Model available: ✓
-Authentication: ✓
-Streaming: ✓
-Vision: ?
-Tool calling: ✓
+Model discovery
+Available                      ✓
 
-Status:
-CONNECTED
+Streaming
+Supported                      ✓
+
+Vision
+Supported                      ✓
+
+Tool calling
+Supported                      ✓
+
+Token usage
+Provider reported             ✓
+
+Connection
+VERIFIED
 
 Important:
-Do NOT claim that KeyGo can cryptographically prove a model's identity if the provider does not expose authoritative identity metadata.
-Distinguish between:
+Do not claim capabilities that have not actually been tested or confirmed.
+Use:
+✓ Verified
+⚠ Unknown
+✗ Unsupported
 
-requested model
-provider-reported model
-endpoint
-observed capabilities
-what KeyGo can independently verify
+where appropriate.
 
+10. Model Discovery
+After successful authentication:
+Provider
+    ↓
+List available models
+    ↓
+Normalize model metadata
+    ↓
+Display in KeyGo
 
-10. Provider Compatibility Testing
-For unknown/custom providers, KeyGo should be able to perform compatibility tests.
-Example:
-CUSTOM PROVIDER
+Model metadata should include where available:
+Model ID
+Display name
+Provider
+Context length
+Input capability
+Output capability
+Vision
+Audio
+Tool calling
+Image generation
+Reasoning
+Token pricing
 
-Authentication       ✓
-Streaming            ✓
-Structured output    ✓
-Tool calling         ?
-Vision               ✗
-Token counting       ?
+If the provider doesn't expose a field:
+Unknown
 
-Generate:
-Compatibility Score
-but clearly explain how the score was calculated.
+Do not invent it.
 
-11. Model Router
-Create a dedicated model routing subsystem.
-User Task
-    ↓
-Task Classification
-    ↓
-Required Capabilities
-    ↓
-Context Requirements
-    ↓
-Privacy Requirements
-    ↓
-Hardware
-    ↓
-Latency
-    ↓
-Budget
-    ↓
-Available Models
-    ↓
-Recommendation
+11. Model Selection
+Create a model selector:
+Provider: OpenAI
 
-Routing strategies:
-Always Selected
-Smart Routing
-Cheapest
-Fastest
-Local First
-Privacy First
-Quality First
+Model:
+[ Select Model ▼ ]
 
-The user must be able to override automatic routing.
+Capabilities:
+✓ Text
+✓ Streaming
+✓ Tools
+✓ Vision
 
-12. Usage & Cost Engine
-Create an independent usage system.
-Track where provider data makes it available:
+Users must be able to manually select the model.
+Automatic routing comes later but the architecture must remain compatible with it.
+
+12. Chat System
+Implement a real persistent chat system.
+Database entities should support concepts similar to:
+Conversation
+Message
+MessagePart
 Provider
 Model
-Input tokens
-Output tokens
-Cached tokens
-Reasoning tokens if applicable
-Tool calls
-Latency
-Request status
-Estimated cost
+Project
+Session
+UsageRecord
 
-Do not fabricate exact token counts when the provider does not expose them.
-Clearly distinguish:
-Actual
-Estimated
-Unavailable
+Messages should support different content types in preparation for multimodal AI:
+Text
+Image
+File
+Audio
+ToolCall
+ToolResult
 
-Example:
-SESSION
+Do not design the database exclusively around plain text.
 
-Input:       9,420
-Output:      4,972
-Total:      14,392
+13. Chat UI
+Implement a clean developer-oriented chat interface.
+Required:
 
-Cost:
-$0.0184
+conversations list
+new conversation
+rename conversation
+delete conversation
+provider selector
+model selector
+message history
+streaming response
+stop generation
+retry
+copy response
+copy code block
+markdown rendering
+syntax highlighting
 
-Status:
-Estimated
 
-Implement budgets:
-Daily limit: $5
-Session limit: $1
+14. Code Blocks
+The chat must properly display:
+C++
+C#
+JavaScript
+TypeScript
+Python
+HTML
+CSS
+JSON
+Bash
+PowerShell
+SQL
 
-Ask before request > $0.10
+Every code block should have:
+Copy
 
+button.
+Later support:
+Apply to file
+Preview
+Compare
 
-13. Project Engine
-Users should be able to open:
+but do not implement unsafe automatic modification yet.
 
-folders
-Git repositories
-existing projects
+15. Local Project Support
+Implement:
+Open Project
 
-KeyGo should detect:
-
+The user chooses a local directory.
+KeyGo should inspect:
+project structure
 languages
 frameworks
 package managers
-dependencies
-Git
-test frameworks
-entry points
+Git repository
+README
 configuration
-documentation
+test directories
 
-Do not blindly send the entire repository to an AI provider.
-Use project indexing and selective context retrieval.
+Do NOT send the entire project to the AI automatically.
 
-14. Project Indexer
-Create:
-IProjectIndexer
+16. Project Context Engine — First Version
+Create a basic project context engine.
+For example:
+User:
 
-Responsibilities:
+"Where is authentication implemented?"
 
-file discovery
-language detection
-symbol indexing
-dependency detection
-Git metadata
-project structure
-searchable context
+KeyGo should:
+Search local project
+      ↓
+Find relevant files
+      ↓
+Select useful context
+      ↓
+Send only relevant context
+      ↓
+AI response
 
-Exclude sensitive/unnecessary files by default.
-Examples:
+Display:
+Context used
+
+✓ AuthService.cs
+✓ LoginController.cs
+✓ UserRepository.cs
+
+Excluded
+
+🔒 .env
+🔒 secrets
+🔒 private keys
+
+
+17. Sensitive File Protection
+Create a configurable exclusion system.
+Default exclusions should consider:
 .env
-credentials
-private keys
-SSH keys
-secrets
-large binaries
+.env.*
+*.pem
+*.key
+*.pfx
+credentials.*
+secrets.*
+SSH private keys
 node_modules
 bin
 obj
-build artifacts
+build
+dist
+large binaries
 
-The exact exclusion strategy must be configurable.
+This list must be configurable.
+Do not assume every file with a particular name is always safe or unsafe.
 
-15. Data Boundary
-Before sending cloud requests, show or internally enforce what data is leaving the device.
-Example:
-DATA SENT TO CLOUD
+18. Data Transmission Preview
+Before sending project context to a cloud provider, KeyGo should internally know:
+Files included
+Approximate tokens
+Sensitive files excluded
+Provider
+Model
+Estimated cost
 
-✓ User prompt
-✓ LoginService.cs
-✓ AuthController.cs
+Later this can become a visible user-facing preview.
+Prepare the architecture now.
 
-EXCLUDED
-
-🔒 .env
-🔒 credentials.json
-🔒 private keys
-
-Sensitive-data detection should be implemented before cloud transmission.
-
-16. Agent Architecture
-Do not give AI unrestricted computer access.
-Architecture:
-AI Model
-   ↓
-Agent
-   ↓
-Tool Request
-   ↓
-Permission Service
-   ↓
-Policy Engine
-   ↓
-Tool Executor
-   ↓
-Operating System
-
-The AI requests actions.
-KeyGo decides whether those actions are permitted.
-
-17. Tool System
-Create a generic tool abstraction.
-Potential tools:
-FileTool
-SearchTool
-TerminalTool
-GitTool
-ProjectTool
-BrowserTool
-VSCodeTool
-ComputerTool
-
-Each tool must declare:
-
-name
-description
-parameters
-required permission
-risk level
-reversibility
-supported environments
-
-
-18. Permission Levels
-Support:
-Observe
-Read/analyze only.
-Assist
-Read + controlled modifications.
-Autonomous
-Long-running missions with predefined boundaries.
-Sensitive actions require confirmation.
-Examples:
-Delete files
-Install software
-Change system settings
-Access sensitive folders
-Modify credentials
-Send external communication
-Purchase anything
-Deploy production
-
-These must never silently happen.
-
-19. Audit Log
-Every consequential action should be logged.
-Example:
-20:41 Read package.json
-20:42 Modified App.tsx
-20:43 Executed dotnet test
-20:43 Tests failed
-20:44 Modified AuthenticationService.cs
-20:45 Tests passed
-
-Never store secrets in the audit log.
-
-20. Checkpoint & Rollback
-Before autonomous modifications:
-Create a checkpoint where possible.
-For Git projects:
-Create branch/worktree/checkpoint
-
-After the mission:
-Show changes
-Tests
-Review
-User approval
-Merge/apply
-
-Support rollback.
-
-21. Coding Agent
-Initial agent should support:
-Read files
-Search code
-Understand project
-Plan changes
-Modify files
-Run tests
-Inspect failures
-Iterate
-Show diff
+19. Token & Cost Tracking
+Implement actual usage tracking where the provider reports usage.
+Distinguish:
+ACTUAL
+ESTIMATED
+UNKNOWN
 
 Example:
-User:
-"Find why login is broken."
+INPUT
+6,210 tokens
 
-Agent:
-→ inspect project
-→ locate authentication flow
-→ identify likely cause
-→ explain
-→ propose fix
-→ show diff
-→ request approval
-→ apply
-→ run tests
-→ report
+OUTPUT
+1,822 tokens
 
+TOTAL
+8,032 tokens
 
-22. Mission Mode
-Create a high-level autonomous workflow.
-Example:
-Mission:
-Build an e-commerce MVP
+Cost
+$0.0142
 
-KeyGo generates:
-✓ Requirements
-✓ Architecture
-✓ Project initialization
-✓ Database
-✓ Backend
-✓ Frontend
-✓ Authentication
-○ Testing
-○ Security
-○ Documentation
+Status
+Provider reported
 
-The mission must be observable and interruptible.
+If tokenization is estimated:
+Estimated
 
-23. Multi-Agent Architecture
-Eventually support:
-Planner
-   │
-   ├── Architect
-   ├── Developer
-   ├── Designer
-   ├── QA
-   ├── Security
-   ├── Reviewer
-   └── DevOps
+must be clearly displayed.
+Never present an estimate as exact usage.
 
-Do NOT implement this before the single-agent system is reliable.
-Agents must have:
+20. Usage Database
+Store:
+Provider
+Model
+Conversation
+Session
+Input tokens
+Output tokens
+Cached tokens where available
+Reasoning tokens where available
+Estimated tokens
+Actual/estimated status
+Estimated cost
+Timestamp
+Latency
+Request status
 
-limited responsibilities
-explicit tools
-explicit permissions
-communication boundaries
-resource limits
+Do not store sensitive prompts unnecessarily.
 
-
-24. AI Review Battle
-Support optional multi-model review:
-Implementation
-     ↓
-Model A Review
-Model B Review
-Model C Review
-     ↓
-Judge
-     ↓
-Final Report
-
-Do not automatically assume that majority opinion equals correctness.
-The final result should explain the evidence.
-
-25. Project Health
-Create deterministic metrics wherever possible.
-Categories:
-Architecture
-Security
-Dependencies
-Testing
-Performance
-Documentation
-Maintainability
-
-Use tools for factual detection.
-Use AI for:
-
-interpretation
-prioritization
-recommendations
-
-Do not ask AI to determine facts that a deterministic tool can establish more reliably.
-
-26. Local AI
-Support local models through a dedicated abstraction.
-Examples:
-
-DeepSeek
-Qwen
-Llama
-Mistral
-Gemma
-Phi
-other compatible local models
-
-Do NOT implement a neural-network inference engine from scratch.
-Integrate with established local inference runtimes through a clean provider interface.
-
-27. Hybrid AI
-KeyGo should support:
-Cloud AI
-Local AI
-Hybrid AI
+21. Budget System
+Implement:
+Daily budget
+Session budget
+Per-request warning
 
 Example:
-Sensitive code
-→ Local
+Daily limit: $5.00
 
-Simple question
-→ Local
+Used: $1.82
+Remaining: $3.18
 
-Complex reasoning
-→ Cloud
+User configuration:
+Ask before request > $0.10
 
-Large project + private data
-→ Local or hybrid depending on user policy
+If a request is expected to exceed the threshold:
+Estimated cost: $0.17
 
-The user controls the policy.
+Continue?
 
-28. Privacy Mode
-Provide:
-PRIVATE MODE: ON
+[Cancel] [Continue]
 
-✓ Local models only
-✓ No cloud AI requests
-✓ Project stays local
-✓ Chat stays local
-✓ Credentials remain local
 
-The UI should make the network state clear.
+22. Permissions Foundation
+Do not implement a fully autonomous computer agent yet.
+Instead establish the permission framework.
+Permissions:
+ReadProject
+WriteProject
+ExecuteCommand
+GitOperation
+BrowserAccess
+ComputerControl
+NetworkAccess
 
-29. Computer Agent
-This is a later-stage capability.
-Potential actions:
-Open application
-Read screen
-Click
-Type
-Keyboard actions
-Browser interaction
-VS Code interaction
-Terminal interaction
+Every future tool must request a permission.
 
-Use strict permissions.
-Do not allow arbitrary destructive system operations.
+23. Basic Project Actions
+Implement only safe operations for this milestone:
+Read file
+Search files
+List directory
+Read Git status
 
-30. VS Code Integration
-Build a lightweight TypeScript VS Code extension.
-Architecture:
-VS Code
-   ↕
-KeyGo Extension
-   ↕
-KeyGo Local Runtime
-   ↕
-KeyGo Core
+Do not allow the AI to autonomously:
+delete arbitrary files
+modify system settings
+install software
+change credentials
+execute unrestricted commands
 
-The extension should provide:
+Those belong to later agent milestones.
 
-selected-code actions
-workspace context
-Ask KeyGo
-Apply diff
-Run agent
-project health
-token/cost information
-
-Do not duplicate the entire KeyGo runtime inside the extension.
-The extension should not be the primary credential store.
-
-31. Voice
-Eventually support:
-Speech
- ↓
-Speech-to-text
- ↓
-KeyGo Runtime
- ↓
-AI
- ↓
-Response
- ↓
-Text-to-speech
-
-Voice should use the same agent/runtime architecture as text.
-Do not create a separate AI architecture for voice.
-
-32. Marketplace
-Implement later.
-Possible categories:
-Providers
-Models
-Agents
-Workflows
-Tools
-Extensions
-Prompt Packs
-Profiles
-Themes
-
-For API-key creation:
-KeyGo should redirect users to the official provider website.
-KeyGo must not secretly create, sell, proxy, or redistribute third-party API credentials.
-Users pay providers directly.
-
-33. Personal AI Memory
-Separate:
-User Preferences
-Project Rules
-Coding Style
-Agent Instructions
-Examples
-Feedback
-
-Memory should be portable across models.
+24. Audit Logging
+Record consequential application events.
 Example:
-User:
-"Always use functional React components."
+10:31 Provider connected
+10:32 Model selected
+10:33 Project opened
+10:34 Read src/AuthService.cs
+10:35 Sent request to OpenAI
+10:35 Response received
 
-KeyGo:
-Save as preference?
+Never log:
+API keys
+passwords
+tokens
+private credentials
 
-[Yes] [No]
 
-Do not describe this as model training unless model weights are actually being fine-tuned.
-Call it:
-Personalization / Memory / Feedback Learning
+25. Error Handling
+Create a consistent error model.
+Handle:
+Invalid API key
+Expired credential
+Rate limit
+Insufficient balance
+Model unavailable
+Unsupported model
+Network failure
+Timeout
+Provider outage
+Malformed provider response
+Streaming failure
+Cancellation
 
-34. Performance Requirements
-KeyGo should be designed for:
+Example UI:
+OpenAI request failed
 
-low idle CPU usage
-low memory consumption
-asynchronous I/O
-lazy loading
+Reason:
+Rate limit exceeded
+
+Retry available in approximately 20 seconds.
+
+[Retry] [Change Model]
+
+Do not expose raw stack traces to normal users.
+Keep diagnostic information in secure developer logs.
+
+26. Test Strategy
+Do not only test happy paths.
+Create:
+Unit tests
+
+provider normalization
+routing
+cost calculation
+token estimation
+permissions
+credential metadata
+project filtering
+
+Integration tests
+
+provider authentication
+model discovery
 streaming
-cancellation
-efficient caching
-minimal unnecessary background work
+database
+credential store
 
-Do not keep every subsystem running continuously.
-Load services only when required.
+Security tests
+Verify:
+API key never enters logs
+API key never enters SQLite
+API key never enters audit records
+AI cannot bypass permissions
+Excluded files aren't accidentally included
 
-35. Reliability Requirements
-Every provider request must handle:
-
-timeout
-cancellation
-rate limits
-authentication errors
-malformed responses
-network failures
-provider outages
-partial streaming failures
-unsupported capabilities
-
-Provide useful error messages.
-Do not silently retry dangerous operations.
-
-36. AI Development Team Rules
-You are one member of an AI software engineering team.
-Before changing another subsystem:
-
-Read the relevant architecture documentation.
-Understand existing interfaces.
-Do not duplicate functionality.
-Do not silently change public contracts.
-Add/update tests.
-Document architectural changes.
-Keep commits focused.
-Never commit secrets.
-Never bypass security controls.
-Do not introduce unnecessary dependencies.
-
-If an architectural change is required:
-STOP and document the proposed change before implementation.
-
-37. AI Coding Rules
-When generating code:
-
-Prefer maintainability over cleverness.
-Use modern C#.
-Use nullable reference types.
-Use dependency injection where appropriate.
-Use async APIs for I/O.
-Pass CancellationToken through long-running operations.
-Dispose resources correctly.
-Avoid unnecessary allocations.
-Avoid blocking async code.
-Avoid global mutable state.
-Keep classes focused.
-Keep provider-specific logic inside provider adapters.
-Keep UI logic out of the core runtime.
-Keep security decisions out of AI-generated prompts.
-Validate all external input.
+Failure tests
+Test:
+network disconnected
+provider timeout
+invalid credential
+cancelled request
+partial stream
+rate limit
+model unavailable
 
 
-38. Dependency Policy
-Do not add a NuGet/npm dependency simply because it makes one small task easier.
-Before adding a dependency evaluate:
+27. Architecture Tests
+Create automated checks preventing architectural violations.
+Examples:
+UI must not directly call provider APIs.
 
-maintenance status
-license
-security history
-community adoption
-package size
-transitive dependencies
-performance
-necessity
+Provider adapters must not depend on UI.
 
-Prefer stable, well-maintained libraries and native .NET functionality when appropriate.
+Core must not depend on WinUI.
 
-39. Documentation
-Maintain:
-README.md
+Credentials must not be accessible through ordinary project-file tools.
 
-/docs
-   architecture.md
-   security.md
-   providers.md
-   agents.md
-   permissions.md
-   contributing.md
+Agents must not bypass PermissionService.
 
-/adr
-   0001-architecture.md
-   0002-provider-abstraction.md
-   0003-credential-storage.md
+This is extremely important because multiple AI developers will work on KeyGo.
 
-Use ADRs for major architectural decisions.
+28. CI/CD
+Set up:
+Build
+Unit tests
+Integration tests where practical
+Static analysis
+Formatting
+Security checks
+Dependency scanning
 
-40. Development Phases
-Do NOT attempt to build the entire specification at once.
-Phase 1 — KeyGo Core Alpha
-Implement only:
-Windows desktop application
-Provider system
-Secure credential storage
-Model list
-Chat
-Streaming
-SQLite
-Chat history
-Basic project folder
-Token/cost tracking
-Basic permissions
+Every pull request should be validated automatically.
+No AI-generated PR should be merged simply because:
 
-Success criteria:
-
-User can install KeyGo, securely add an API key, verify the provider, select a model, chat with it, open a local project, and use project context without sending the API key to KeyGo servers.
+"It compiles."
 
 
-Phase 2 — Developer Workspace
-Add:
-Project indexing
-Code search
-Repository understanding
-Git
-Code blocks
-Diff viewer
-Project health
-
-
-Phase 3 — Coding Agent
-Add:
-Tool system
-File tools
-Terminal
-Git
-Permission engine
-Coding agent
+29. AI Development Team Workflow
+The AI team must work using:
+Issue
+ ↓
+Design
+ ↓
+Implementation
+ ↓
 Tests
-Checkpoints
-Rollback
-Audit log
+ ↓
+Security review
+ ↓
+Architecture review
+ ↓
+Integration
+
+Every significant change should have:
+What changed?
+Why?
+Architecture impact?
+Security impact?
+Tests?
+Breaking changes?
 
 
-Phase 4 — Model Intelligence
-Add:
-Smart routing
-Model comparison
-Model tournament
-Provider compatibility
-Cost optimization
+30. Git Rules
+Use small, focused commits.
+Examples:
+feat(provider): add OpenAI streaming adapter
+
+feat(chat): add persistent conversations
+
+feat(security): add Windows credential storage
+
+feat(project): add project discovery
+
+test(provider): add streaming failure tests
+
+Never commit:
+API keys
+credentials
+.env files containing secrets
+personal project data
+generated secrets
 
 
-Phase 5 — Local AI
-Add:
-Local model manager
-Hardware detection
-Local inference integrations
-Hybrid routing
-Privacy mode
+31. Definition of Done
+This sprint is complete only when all of the following work:
+[ ] KeyGo builds successfully
+[ ] KeyGo launches
+[ ] Provider can be configured
+[ ] API credential is securely stored
+[ ] Credential can be verified
+[ ] Models can be discovered
+[ ] User can select a model
+[ ] User can start a conversation
+[ ] Response streams into UI
+[ ] User can stop generation
+[ ] Conversation persists
+[ ] Code blocks render correctly
+[ ] Code can be copied
+[ ] Project folder can be opened
+[ ] Project structure can be inspected
+[ ] Relevant project files can be selected
+[ ] Sensitive files are excluded
+[ ] Usage is tracked
+[ ] Cost is calculated/estimated correctly
+[ ] Audit logging works
+[ ] Permission framework works
+[ ] Errors are handled
+[ ] Tests pass
+[ ] Security tests pass
+[ ] Documentation updated
 
 
-Phase 6 — VS Code
-Add:
-VS Code extension
-Code selection
-Agent integration
-Diff application
-Project health
-Token/cost display
+32. Performance Requirements
+Measure actual performance.
+Do not simply claim:
+
+"Low RAM."
+
+Measure:
+Startup time
+Idle RAM
+Active chat RAM
+CPU usage
+Project indexing time
+Database operations
+Streaming latency
+
+Create:
+docs/performance-baseline.md
+
+Record baseline measurements.
+Optimize based on measurements rather than assumptions.
+
+33. UX Requirement
+The application should feel simple despite the complex backend.
+A new developer should understand:
+Add AI
+   ↓
+Connect
+   ↓
+Choose model
+   ↓
+Chat
+
+For projects:
+Open Project
+   ↓
+Ask KeyGo
+   ↓
+Review context
+   ↓
+Get answer
+
+Do not expose unnecessary technical complexity to normal users.
+Provide advanced settings for advanced developers.
+
+34. Do NOT Implement Yet
+Do NOT spend this sprint implementing:
+❌ Marketplace
+❌ Multi-agent company
+❌ Autonomous software factory
+❌ Full computer control
+❌ Browser agent
+❌ Voice calling
+❌ Automatic deployment
+❌ Advanced local model manager
+❌ Model tournament
+❌ AI marketplace
+❌ Community extensions
+
+However, the architecture must remain capable of supporting them later.
+
+35. Deliverables
+At the end of the sprint provide:
+1. Working KeyGo Core Alpha
+2. Updated architecture documentation
+3. Current-state report
+4. Provider documentation
+5. Security documentation
+6. Threat model
+7. API credential design
+8. Database schema
+9. Test report
+10. Performance baseline
+11. Known limitations
+12. Next-sprint recommendations
 
 
-Phase 7 — Computer Agent
-Add:
-Browser
-Computer interaction
-Desktop applications
-Screen understanding
-Mission execution
+36. Final Requirement
+Do not optimize for the number of features completed.
+Optimize for:
+SECURITY
+     ↓
+CORRECTNESS
+     ↓
+RELIABILITY
+     ↓
+ARCHITECTURE
+     ↓
+PERFORMANCE
+     ↓
+UX
+     ↓
+FEATURES
 
+KeyGo Core Alpha must become a solid foundation for the much larger KeyGo platform.
+Do not fake functionality.
+Do not use placeholder implementations while claiming a feature is production-ready.
+If a provider cannot reliably support a capability, represent it as:
+Unsupported
 
-Phase 8 — Multi-Agent Software Factory
-Add:
-Planner
-Architect
-Developer
-QA
-Security
-Reviewer
-DevOps
-Mission orchestration
+or:
+Unknown
 
-
-Phase 9 — Marketplace
-Add:
-Providers
-Models
-Agents
-Workflows
-Tools
-Extensions
-Community ecosystem
-
-
-41. What NOT to do
-Never:
-
-hardcode API keys
-send API keys to KeyGo servers
-store credentials in plaintext
-give AI unrestricted filesystem access
-give AI unrestricted terminal access
-allow silent destructive operations
-build the inference engine from scratch
-tightly couple UI to providers
-assume all models have identical capabilities
-claim exact token usage when only an estimate exists
-automatically deploy production software without appropriate confirmation
-add dozens of dependencies without justification
-build all future features before the core is stable
-
-
-42. Definition of Quality
-KeyGo should feel like a serious developer product, not an AI-generated prototype.
-The following are more important than feature count:
-Security > Reliability > Architecture > Performance > UX > Feature count
-A smaller KeyGo that developers trust is better than a huge KeyGo that randomly breaks or exposes credentials.
-
-43. First Task
-Do NOT immediately generate the entire application.
-First produce:
-
-Final architecture diagram
-Recommended solution/project structure
-Core interfaces
-Dependency graph
-Data model
-Security threat model
-Provider abstraction design
-Agent/tool architecture
-Permission model
-Phase-1 implementation plan
-Testing strategy
-CI/CD strategy
-Coding standards
-ADR list
-Risk register
-
-Then wait for architectural approval.
-After approval, begin implementation module by module.
-The first implementation milestone is:
-
-KeyGo Core Alpha
-
-Do not implement the marketplace, computer agent, autonomous software factory, or multi-agent company until the underlying runtime and security architecture are stable.
-
-FINAL PRODUCT PRINCIPLE
-KeyGo should ultimately become:
-                         KEYGO
-                           │
-                    ┌──────┴──────┐
-                    │ AI Runtime  │
-                    └──────┬──────┘
-                           │
-                    ┌──────┴──────┐
-                    │ Model Router│
-                    └──────┬──────┘
-                           │
-             ┌─────────────┼─────────────┐
-             ↓             ↓             ↓
-          Cloud AI      Local AI      Hybrid AI
-             │             │             │
-             └─────────────┼─────────────┘
-                           ↓
-                     Agent Engine
-                           ↓
-                    Permission Layer
-                           ↓
-                       Tool System
-                           ↓
-              ┌────────────┼────────────┐
-              ↓            ↓            ↓
-            Files       Terminal       Git
-              ↓            ↓            ↓
-              └────────────┼────────────┘
-                           ↓
-                       User PC
-
-AI provides intelligence.
-KeyGo provides orchestration.
-The permission system provides control.
-The user's computer provides execution.
-The user remains in control.
-Build for this vision, but implement it incrementally.
+rather than pretending it works.
+The goal of this sprint is to make KeyGo's foundation real.
