@@ -1,0 +1,1094 @@
+KEYGO — MAJOR IMPLEMENTATION SPRINT
+Project Intelligence → Coding Agent → Safe Editing → Testing → Verification
+Mission
+KeyGo currently has the foundational architecture for a local-first Windows AI development environment:
+
+.NET/C#
+AI provider abstraction
+Multiple AI providers
+Secure API credential handling
+Model selection/routing foundation
+Local project support
+Usage/token/cost tracking
+Permission system
+Desktop application shell
+Tests
+Architecture/security documentation
+
+The next milestone is to transform KeyGo from an AI workspace into a real AI coding agent.
+The target workflow is:
+User Goal
+   ↓
+Understand Project
+   ↓
+Investigate
+   ↓
+Plan
+   ↓
+Show Plan
+   ↓
+User Approval
+   ↓
+Generate Changes
+   ↓
+Show Diff
+   ↓
+User Approval
+   ↓
+Apply Changes
+   ↓
+Run Tests
+   ↓
+Analyze Results
+   ↓
+Fix Safe Problems
+   ↓
+Run Tests Again
+   ↓
+Final Review
+   ↓
+Report
+
+The agent must be powerful, but never mysterious.
+Every consequential operation must be observable, permission-controlled, and reversible where practical.
+
+1. IMPORTANT: INSPECT THE EXISTING SYSTEM FIRST
+Before implementing anything:
+Inspect the entire existing architecture.
+Pay particular attention to:
+Core
+Runtime
+Provider adapters
+AI abstractions
+Project services
+Permission system
+Security layer
+SQLite
+Chat
+Usage tracking
+Desktop UI
+Tests
+Documentation
+
+Determine what already exists.
+Do NOT create duplicate implementations.
+If an existing abstraction is good, extend it.
+If something is incomplete, finish it.
+If something is architecturally wrong, refactor it carefully with tests.
+Do not rewrite the entire application.
+
+2. CODING AGENT ARCHITECTURE
+Introduce a dedicated:
+KeyGo Coding Agent
+Architecture:
+                    USER
+                      │
+                      ↓
+                 Agent Request
+                      │
+                      ↓
+               Agent Orchestrator
+                      │
+        ┌─────────────┼─────────────┐
+        ↓             ↓             ↓
+   Context       Planning       Permission
+    Engine        Engine          Engine
+        │             │             │
+        └─────────────┼─────────────┘
+                      ↓
+                  Tool Engine
+                      │
+       ┌──────────────┼──────────────┐
+       ↓              ↓              ↓
+     Files          Git           Terminal
+       │              │              │
+       └──────────────┼──────────────┘
+                      ↓
+                  Verification
+
+Keep the agent independent from any particular AI provider.
+
+3. AGENT STATE MACHINE
+The agent should have explicit states:
+Idle
+↓
+Understanding
+↓
+Investigating
+↓
+Planning
+↓
+WaitingForApproval
+↓
+Executing
+↓
+Testing
+↓
+Verifying
+↓
+Completed
+
+Failure states:
+Cancelled
+Failed
+BlockedByPermission
+NeedsUserInput
+
+Never hide state transitions.
+
+4. USER GOAL
+The user should be able to give natural-language objectives.
+Examples:
+"Find why login is failing."
+
+"Add dark mode."
+
+"Fix the failing tests."
+
+"Add password validation."
+
+"Convert this component to TypeScript."
+
+"Improve the performance of this API."
+
+"Add unit tests for AuthService."
+
+The agent must not immediately modify files.
+First investigate.
+
+5. INVESTIGATION PHASE
+Example:
+User:
+"Why is login failing?"
+
+KeyGo:
+
+Investigating...
+
+✓ Detected ASP.NET Core
+✓ Found authentication system
+✓ Located AuthService
+✓ Located LoginController
+✓ Located authentication middleware
+✓ Located authentication tests
+✓ Checked recent Git changes
+
+Then explain findings.
+
+6. AGENT TOOL SYSTEM
+Create a strongly typed tool architecture.
+Example:
+IKeyGoTool
+
+Each tool should declare:
+Tool ID
+Description
+Input schema
+Output schema
+Required permission
+Risk level
+
+Initial tools:
+ReadFile
+SearchFiles
+SearchSymbols
+GetProjectTree
+GetProjectMetadata
+GetGitStatus
+GetGitDiff
+GetGitHistory
+FindReferences
+ReadDirectory
+
+Editing tools:
+CreateFile
+ModifyFile
+DeleteFile
+MoveFile
+RenameFile
+
+Execution tools:
+RunCommand
+RunTests
+RunBuild
+
+Do not expose all tools to every agent.
+
+7. PERMISSION ENGINE
+The permission engine must be an actual enforcement layer.
+Not merely UI.
+Example:
+Tool                 Permission
+───────────────────────────────
+ReadFile             READ
+SearchFiles          READ
+GetGitStatus         READ
+
+CreateFile           WRITE
+ModifyFile           WRITE
+DeleteFile           DELETE
+
+RunCommand           EXECUTE
+RunTests             EXECUTE
+
+GitCommit            GIT_WRITE
+GitPush              NETWORK_WRITE
+
+The agent cannot bypass these permissions.
+
+8. DEFAULT AGENT MODE
+Default:
+OBSERVE
+
+The agent can:
+✓ Read
+✓ Search
+✓ Analyze
+✓ Inspect Git
+✓ Build plans
+
+Cannot:
+✗ Modify files
+✗ Delete files
+✗ Run arbitrary commands
+✗ Commit
+✗ Push
+
+
+9. PLAN GENERATION
+For a modification request:
+User:
+"Add dark mode."
+
+KeyGo should produce:
+PLAN
+
+1. Inspect existing theme system
+2. Identify application entry point
+3. Locate CSS/theme configuration
+4. Design dark theme variables
+5. Modify relevant UI files
+6. Build application
+7. Run tests
+8. Review changes
+
+Then:
+[Approve Plan]
+[Modify Plan]
+[Cancel]
+
+
+10. PLAN MUST BE STRUCTURED
+Do not treat plans as plain AI text only.
+Represent them as structured objects:
+Plan
+ ├── Goal
+ ├── Steps
+ ├── Tools required
+ ├── Files expected to change
+ ├── Risks
+ ├── Estimated operations
+ └── Approval state
+
+This allows future automation and auditing.
+
+11. CONTEXT ENGINE
+Use the existing project intelligence/context system.
+The agent should retrieve only relevant context.
+Example:
+User:
+"Fix login."
+
+Context Engine:
+
+AuthService.cs
+LoginController.cs
+AuthMiddleware.cs
+TokenService.cs
+AuthTests.cs
+appsettings configuration
+
+Do NOT send the entire repository unless explicitly requested.
+
+12. CONTEXT TRANSPARENCY
+Before an AI request:
+CONTEXT
+
+Files:
+5
+
+Estimated tokens:
+8,421
+
+Privacy:
+Cloud
+
+Provider:
+OpenAI
+
+Model:
+Selected Model
+
+Allow:
+[View Context]
+
+The user should understand what is being sent.
+
+13. CHANGE GENERATION
+After plan approval, the agent can generate modifications.
+However:
+Do not directly overwrite files.
+Instead produce:
+Proposed Changes
+
+Internally create a safe temporary representation.
+
+14. DIFF ENGINE
+This is a critical KeyGo feature.
+Every modification must produce a diff.
+Example:
+src/Auth/AuthService.cs
+
+- if (user == null)
++ if (user == null || !user.IsActive)
+      return false;
+
+Show:
+Files changed: 3
+Lines added: 18
+Lines removed: 7
+
+
+15. CHANGE REVIEW UI
+Provide:
+┌─────────────────────────────────────┐
+│ CHANGE REVIEW                       │
+├─────────────────────────────────────┤
+│ AuthService.cs                      │
+│                                     │
+│ + Added account status validation   │
+│ - Removed unreachable branch       │
+│                                     │
+│ [Accept] [Reject] [Edit]            │
+└─────────────────────────────────────┘
+
+Support:
+Accept All
+Reject All
+Accept File
+Reject File
+
+Where practical support hunk-level approval.
+
+16. NEVER MODIFY WITHOUT AUTHORIZATION
+Unless the user has explicitly enabled an appropriate autonomous permission level:
+AI proposes
+      ↓
+User reviews
+      ↓
+User approves
+      ↓
+KeyGo modifies
+
+The agent must not silently edit project files.
+
+17. TRANSACTIONAL FILE OPERATIONS
+File modifications should be designed so that partial failures don't corrupt the project.
+Before applying changes:
+Validate paths
+Validate diff
+Create backup/checkpoint
+Apply changes
+Verify writes
+
+If something fails:
+Rollback
+
+where safe and possible.
+
+18. SNAPSHOT SYSTEM
+Create a local change snapshot before agent modifications.
+Example:
+KeyGo Snapshot
+
+Project:
+MyApplication
+
+Before:
+commit abc123
+
+Agent operation:
+Add authentication validation
+
+Snapshot:
+KG-2026-00142
+
+The user can later:
+Restore Snapshot
+
+Do not implement destructive Git reset as the only rollback mechanism.
+
+19. TEST EXECUTION
+After approved changes:
+Changes applied
+      ↓
+Build
+      ↓
+Tests
+
+Detect project technology and choose appropriate commands.
+Examples:
+.NET:
+dotnet build
+dotnet test
+
+Node:
+npm test
+npm run build
+
+Python:
+pytest
+
+Rust:
+cargo test
+
+Commands must be generated from detected project configuration rather than blindly assumed.
+
+20. TERMINAL SECURITY
+Terminal execution is dangerous.
+Create a command policy.
+Classify commands:
+SAFE
+REVIEW_REQUIRED
+DANGEROUS
+BLOCKED
+
+Examples:
+dotnet test
+SAFE
+
+npm test
+SAFE
+
+git status
+SAFE
+
+npm install
+REVIEW_REQUIRED
+
+rm -rf
+BLOCKED/REVIEW_REQUIRED
+
+format disk
+BLOCKED
+
+Do not rely solely on string matching.
+Use a structured command execution policy.
+
+21. COMMAND APPROVAL
+When approval is required:
+KeyGo wants to execute:
+
+dotnet test
+
+Reason:
+Verify changes made to AuthService.cs
+
+Working directory:
+C:\Projects\MyApp
+
+[Allow Once]
+[Allow For Session]
+[Deny]
+
+
+22. TEST RESULT ANALYSIS
+After tests:
+TEST RESULTS
+
+Passed: 47
+Failed: 2
+Skipped: 1
+
+Failures:
+
+AuthTests.Login_InvalidPassword
+AuthTests.Login_DisabledAccount
+
+The AI can analyze failures.
+
+23. AGENT REPAIR LOOP
+Implement controlled repair:
+Test failure
+      ↓
+Read failure
+      ↓
+Find relevant code
+      ↓
+Analyze
+      ↓
+Create proposed fix
+      ↓
+Show diff
+      ↓
+User approval
+      ↓
+Apply
+      ↓
+Run tests again
+
+Do not allow an uncontrolled infinite loop.
+Set limits:
+Maximum iterations
+Maximum files changed
+Maximum commands
+Maximum execution time
+Maximum token/cost budget
+
+
+24. BUDGET-AWARE AGENT
+Integrate with KeyGo usage tracking.
+Before an expensive agent task:
+Estimated AI cost:
+
+$0.08 – $0.21
+
+Budget remaining:
+$1.42
+
+[Continue]
+[Cancel]
+
+If the budget is exceeded:
+AGENT PAUSED
+
+Budget limit reached.
+
+[Increase Budget]
+[Stop]
+
+Never secretly spend beyond the user's configured limit.
+
+25. MULTI-MODEL AGENT SUPPORT
+The coding agent should work with any compatible provider.
+Example:
+Planning:
+Model A
+
+Implementation:
+Model B
+
+Review:
+Model C
+
+But initially support:
+One selected model
+
+with architecture ready for future multi-model workflows.
+Do not make the first implementation unnecessarily complex.
+
+26. MODEL ROLE SELECTION
+Prepare an abstraction for future:
+Planner
+Coder
+Reviewer
+Tester
+Security Reviewer
+
+For now:
+Default Model
+
+Later KeyGo can route tasks intelligently.
+
+27. SELF-REVIEW
+After changes:
+KeyGo Review
+
+✓ Build succeeds
+✓ Tests pass
+✓ No unexpected files changed
+✓ Diff matches requested goal
+
+Potential concern:
+Authentication behavior changed for disabled users.
+
+The agent should review its own changes.
+But self-review must not replace user approval.
+
+28. UNEXPECTED CHANGES
+If the agent discovers that the task requires additional files:
+Original scope:
+3 files
+
+New requirement:
+2 additional files
+
+KeyGo paused.
+
+Additional files:
+Database migration
+Authentication configuration
+
+[Approve Expanded Scope]
+[Reject]
+
+This prevents silent scope expansion.
+
+29. PROJECT BOUNDARY
+Agent file operations must remain inside the project root by default.
+Reject:
+../../
+
+and unsafe path traversal.
+Do not allow an agent to silently modify:
+Windows system directories
+user credential directories
+other projects
+
+
+30. SECRET PROTECTION
+Before AI context is sent:
+Scan relevant files
+      ↓
+Detect potential secrets
+      ↓
+Redact/exclude
+      ↓
+Build context
+      ↓
+Send to provider
+
+Potential secrets:
+API keys
+Passwords
+Private keys
+Tokens
+Connection strings
+.env secrets
+Certificates
+
+Never send raw credentials to the model merely for classification.
+
+31. GIT SAFETY
+The agent may inspect:
+git status
+git diff
+git log
+
+But by default it cannot:
+git commit
+git push
+git reset --hard
+git clean
+force push
+
+These require explicit permissions.
+
+32. AGENT ACTIVITY TIMELINE
+Create a visual timeline:
+KEYGO AGENT
+
+20:41  Started investigation
+20:41  Searched authentication
+20:42  Read AuthService.cs
+20:42  Read LoginController.cs
+20:43  Generated plan
+20:43  Waiting for approval
+20:44  Plan approved
+20:44  Generated changes
+20:45  Diff approved
+20:45  Modified 3 files
+20:46  Running tests
+20:46  47 passed / 2 failed
+20:47  Investigating failures
+
+This becomes a major trust feature.
+
+33. SESSION REPORT
+At the end:
+KEYGO SESSION REPORT
+
+Goal:
+Fix login authentication
+
+Files inspected:
+14
+
+Files modified:
+3
+
+Lines added:
+31
+
+Lines removed:
+8
+
+Tests:
+49
+
+Passed:
+49
+
+Failed:
+0
+
+AI tokens:
+14,832
+
+Estimated cost:
+$0.042
+
+Time:
+4m 32s
+
+Status:
+✓ COMPLETED
+
+
+34. "WHAT DID KEYGO CHANGE?"
+Provide a human-readable summary:
+KeyGo changed:
+
+1. AuthService.cs
+   Added disabled-account validation.
+
+2. LoginController.cs
+   Improved error handling.
+
+3. AuthTests.cs
+   Added tests for disabled accounts.
+
+All tests passed.
+
+
+35. CANCEL EVERYTHING
+Add:
+[Stop Agent]
+
+The user must be able to stop an active mission.
+Cancellation should propagate to:
+AI streaming
+tool execution
+background tasks
+terminal process
+
+where technically possible.
+
+36. CRASH RECOVERY
+If KeyGo crashes during an agent operation:
+On restart:
+RECOVERABLE SESSION FOUND
+
+The previous KeyGo session was interrupted.
+
+Project:
+MyApplication
+
+Status:
+Changes may have been partially applied.
+
+[Inspect]
+[Rollback]
+[Continue]
+[Discard Session]
+
+Do not blindly continue execution after a crash.
+
+37. AGENT MODES
+Implement:
+Observe
+Read
+Search
+Analyze
+
+Assist
+Read
+Plan
+Propose edits
+Run approved tests
+
+Autonomous
+Prepare architecture for:
+Approved edit scope
+Approved commands
+Automatic test/fix cycles
+
+But keep high-risk actions gated.
+
+38. "FIX MY PROJECT" EXPERIENCE
+Create the first polished mission:
+⚡ FIX MY PROJECT
+
+User clicks it.
+KeyGo:
+Analyzing project...
+
+✓ Build system detected
+✓ Git detected
+✓ Tests detected
+
+Running safe diagnostics...
+
+Then:
+PROJECT ISSUES
+
+Critical: 0
+High: 3
+Medium: 8
+Low: 14
+
+[Generate Repair Plan]
+
+The first version should only automatically propose fixes.
+
+39. "BUILD MY PROJECT"
+Prepare the foundation for:
+Build
+
+User:
+"Build this project."
+
+KeyGo:
+Detected:
+.NET
+
+Command:
+dotnet build
+
+[Run]
+
+This is simpler than full autonomous software generation and should be implemented now.
+
+40. CODE NAVIGATION
+AI references should be clickable:
+AuthService.cs:42
+
+Clicking opens:
+AuthService.cs
+line 42
+
+Support future editor integration.
+
+41. INTERNAL FILE VIEWER
+If the desktop application does not already have one, create a basic code viewer:
+File tree
+     ↓
+File
+     ↓
+Syntax highlighted code
+     ↓
+Line numbers
+
+It should be optimized for viewing rather than becoming a full IDE.
+
+42. PERFORMANCE
+Do not load huge repositories into memory.
+Use:
+Streaming
+Incremental indexing
+Lazy loading
+Caching
+Async operations
+
+Agent operations must not freeze the UI.
+
+43. SECURITY TESTING
+Create tests attempting to bypass permissions.
+Examples:
+Agent attempts unauthorized WriteFile
+Agent attempts DeleteFile
+Agent attempts access outside root
+Agent attempts credential access
+Agent attempts dangerous command
+Agent attempts Git push
+
+All must be rejected when permissions do not allow them.
+
+44. TESTING REQUIREMENTS
+Add tests for:
+Agent state machine
+Tool registry
+Tool permissions
+Plan generation models
+Diff generation
+File transaction
+Rollback
+Command policy
+Agent cancellation
+Budget enforcement
+Project boundary
+Secret filtering
+Crash recovery
+
+Add integration tests for:
+Investigation
+Plan
+Approval
+Edit
+Test
+Repair
+Final report
+
+Use mocks/fakes where real AI calls are unnecessary.
+
+45. DOCUMENTATION
+Add/update:
+docs/agent-architecture.md
+docs/tool-system.md
+docs/agent-permissions.md
+docs/file-transactions.md
+docs/terminal-security.md
+docs/agent-lifecycle.md
+docs/current-state.md
+
+Document the trust model.
+
+46. DEFINITION OF DONE
+A fresh developer must be able to open a real project and perform:
+1. Open project
+
+2. Click:
+   Coding Agent
+
+3. Enter:
+
+   "Find why the login tests are failing."
+
+4. KeyGo investigates.
+
+5. KeyGo shows:
+   files inspected
+   findings
+   relevant code
+
+6. User asks:
+
+   "Fix it."
+
+7. KeyGo generates a structured plan.
+
+8. User approves.
+
+9. KeyGo generates changes.
+
+10. KeyGo shows a diff.
+
+11. User approves.
+
+12. KeyGo applies changes.
+
+13. KeyGo runs tests.
+
+14. Tests fail.
+
+15. KeyGo analyzes failures.
+
+16. KeyGo proposes another fix.
+
+17. User approves.
+
+18. KeyGo applies fix.
+
+19. Tests pass.
+
+20. KeyGo performs final review.
+
+21. KeyGo produces:
+
+    SESSION REPORT
+
+22. User can inspect:
+    files changed
+    diff
+    tests
+    commands
+    token usage
+    estimated cost
+
+
+47. CRITICAL SAFETY RULE
+The following must NEVER happen silently:
+File deletion
+Large-scale file modification
+System configuration changes
+Credential changes
+External communication
+Purchases
+Git push
+Destructive commands
+Access outside project
+
+These must require explicit permission.
+
+48. SUCCESS CRITERIA
+When this milestone is finished, KeyGo should no longer be described merely as:
+
+"A multi-provider AI workspace."
+
+It should be demonstrable as:
+
+A local-first AI coding agent that can understand a real repository, investigate problems, create an implementation plan, propose changes, show diffs, obtain approval, safely modify files, run tests, analyze failures, and verify the result.
+
+The architecture should now be:
+                         KEYGO
+                           │
+            ┌──────────────┴──────────────┐
+            ↓                             ↓
+       AI RUNTIME                   PROJECT ENGINE
+            │                             │
+      Provider Layer                Repository Index
+            │                       Context Engine
+      Model Selection               Code Search
+            │                             │
+            └──────────────┬──────────────┘
+                           ↓
+                     CODING AGENT
+                           │
+                  ┌────────┴────────┐
+                  ↓                 ↓
+              TOOL ENGINE       PERMISSIONS
+                  │                 │
+       ┌──────────┼──────────┐      │
+       ↓          ↓          ↓      │
+     Files      Git       Terminal  │
+       │          │          │      │
+       └──────────┼──────────┘      │
+                  ↓                 │
+               DIFF                 │
+                  ↓                 │
+              APPROVAL ←────────────┘
+                  ↓
+              EXECUTION
+                  ↓
+                TEST
+                  ↓
+              VERIFICATION
+                  ↓
+              REPORT
+
+
+49. ENGINEERING PRINCIPLE
+The goal is NOT:
+
+"Make an AI that can control the computer."
+
+The goal is:
+
+"Make an AI that can perform serious software engineering work while the developer remains in control."
+
+Every powerful capability should have:
+Visibility
+Permission
+Auditability
+Cancellation
+Recovery
+
+Build the system so future features such as:
+Browser Agent
+Computer Agent
+Multi-Agent Company
+Software Factory
+VS Code integration
+Autonomous Missions
+
+can be added on top of this foundation without redesigning the core runtime.
