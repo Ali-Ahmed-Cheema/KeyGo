@@ -3,7 +3,6 @@ using KeyGo.Core.Services;
 using KeyGo.Core.Storage;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http;
-using System.IO;
 
 namespace KeyGo.App.Services;
 
@@ -19,13 +18,14 @@ public sealed class AppHost
 
     public AppHost()
     {
-        ConfigureLocalTestCredential();
-        Providers = new IAIProvider[]
+        var directProviders = new IAIProvider[]
         {
             new OpenAIProvider(Credentials, new HttpClient()),
             new GeminiProvider(Credentials),
-            new AnthropicProvider(Credentials)
+            new AnthropicProvider(Credentials),
+            new OpenAICompatibleProvider(Credentials)
         };
+        Providers = new IAIProvider[] { new AutoDetectProvider(Credentials, directProviders) }.Concat(directProviders).ToArray();
         ProviderManager = new ProviderManager(Credentials, Providers);
 
         var options = new DbContextOptionsBuilder<KeyGoDbContext>()
@@ -37,27 +37,6 @@ public sealed class AppHost
         Agent = new CodingAgentOrchestrator(Workspace, new ProjectContextService(Workspace));
     }
 
-    private void ConfigureLocalTestCredential()
-    {
-        var keyPath = Path.Combine(AppContext.BaseDirectory, "APIKey.txt");
-        if (!File.Exists(keyPath))
-        {
-            keyPath = Path.Combine(Directory.GetCurrentDirectory(), "APIKey.txt");
-        }
-
-        if (!File.Exists(keyPath))
-        {
-            keyPath = Path.Combine(Directory.GetCurrentDirectory(), "KeyGo", "APIKey.txt");
-        }
-
-        if (!File.Exists(keyPath)) return;
-
-        var key = File.ReadAllText(keyPath).Trim();
-        if (!string.IsNullOrWhiteSpace(key))
-        {
-            Credentials.SaveAsync("gemini", "default", key).GetAwaiter().GetResult();
-        }
-    }
 }
 
 public interface IFolderPickerService

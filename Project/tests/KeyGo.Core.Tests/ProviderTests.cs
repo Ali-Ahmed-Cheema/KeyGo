@@ -64,6 +64,22 @@ public class ProviderTests
         Assert.Equal("gemini-1.5-flash", models[0].Id);
     }
 
+    [Fact]
+    public async Task OpenAICompatibleProvider_UsesConfiguredEndpointAndDiscoversModels()
+    {
+        var credentials = new WindowsCredentialManager();
+        await credentials.SaveAsync("openai-compatible", "default", "xpl-test");
+        var handler = new CompatibleModelsHandler();
+        var provider = new OpenAICompatibleProvider(credentials, new HttpClient(handler), "https://example.test/v1");
+
+        var result = await provider.ValidateAsync();
+        var models = await provider.GetModelsAsync();
+
+        Assert.True(result.IsConnected);
+        Assert.Equal("https://example.test/v1/models", handler.LastRequestUri?.ToString());
+        Assert.Contains(models, model => model.Id == "provider-chat-model");
+    }
+
     private sealed class OpenAIModelsHandler : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -111,6 +127,20 @@ public class ProviderTests
                 })
             };
             return Task.FromResult(response);
+        }
+    }
+
+    private sealed class CompatibleModelsHandler : HttpMessageHandler
+    {
+        public Uri? LastRequestUri { get; private set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            LastRequestUri = request.RequestUri;
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = JsonContent.Create(new { data = new[] { new { id = "provider-chat-model" } } })
+            });
         }
     }
 }

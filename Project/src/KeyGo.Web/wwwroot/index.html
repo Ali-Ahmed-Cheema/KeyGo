@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KeyGo | Local AI workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">K</span><span>KEYGO</span></div>
+      <div class="eyebrow">LOCAL AI WORKSPACE</div>
+      <nav>
+        <button class="nav-item active" data-view="chat"><span>01</span> Workspace</button>
+        <button class="nav-item" data-view="providers"><span>02</span> Providers</button>
+        <button class="nav-item" data-view="project"><span>03</span> Project files</button>
+      </nav>
+      <div class="sidebar-foot"><span class="status-dot"></span><span id="connection-state">No provider connected</span></div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar"><div><div class="eyebrow" id="view-kicker">MISSION CONTROL</div><h1 id="view-title">Chat with your project</h1></div><div class="top-meta"><span id="project-label">No project selected</span><span class="privacy-pill">LOCAL RUNTIME</span></div></header>
+      <section id="chat-view" class="view active">
+        <div class="chat-layout">
+          <div class="conversation-panel">
+            <div id="messages" class="messages"><div class="empty-state"><div class="empty-number">01</div><h2>Start a focused conversation.</h2><p>Connect a provider, open a project, then ask KeyGo to inspect, explain, or improve your work.</p><button class="text-button" data-jump="providers">Connect a provider <span>↗</span></button></div></div>
+            <form id="chat-form" class="composer"><textarea id="prompt" placeholder="Ask about your project..." rows="1"></textarea><button class="send-button" type="submit" aria-label="Send message">↑</button></form>
+          </div>
+          <aside class="inspector"><div class="eyebrow">SESSION</div><label>MODEL<select id="model-select"><option value="">Connect a provider first</option></select></label><label>PROJECT ROOT<input id="project-path" placeholder="C:\\Projects\\my-app"></label><button id="open-project" class="outline-button" type="button">Index project</button><div id="project-status" class="small-note">Project context is included only when selected.</div><div class="inspector-rule"></div><div class="eyebrow">BOUNDARY</div><p class="small-note">Credentials stay in the local runtime. Only selected project context is sent to the connected provider.</p></aside>
+        </div>
+      </section>
+      <section id="providers-view" class="view"><div class="section-grid"><div><div class="eyebrow">BRING YOUR OWN KEY</div><h2>One key. Any compatible model.</h2><p class="lede">KeyGo probes supported providers locally and keeps the credential out of the browser response.</p><div id="provider-list" class="provider-list"></div></div><form id="provider-form" class="form-panel"><div class="panel-top"><span class="eyebrow">CONNECTION</span><span id="provider-badge" class="badge">READY</span></div><label>PROVIDER<select id="provider-select"></select></label><label id="endpoint-field">ENDPOINT<input id="endpoint" value="https://api.openai.com/v1"></label><label>API KEY<input id="api-key" type="password" autocomplete="off" placeholder="Paste your provider key"></label><button class="primary-button" type="submit">Verify and discover models <span>→</span></button><div id="provider-status" class="form-status"></div></form></div></section>
+      <section id="project-view" class="view"><div class="project-header"><div><div class="eyebrow">PROJECT EXPLORER</div><h2 id="project-title">No project indexed</h2></div><button class="outline-button" data-jump="chat">Back to workspace</button></div><div id="file-list" class="file-list"><div class="empty-state compact"><h2>Choose a local project path.</h2><p>Indexing runs on the machine hosting KeyGo.</p></div></div></section>
+    </main>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
