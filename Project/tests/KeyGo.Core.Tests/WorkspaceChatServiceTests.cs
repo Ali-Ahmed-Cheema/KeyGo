@@ -48,6 +48,7 @@ public sealed class WorkspaceChatServiceTests
         public string Id => "fake";
         public string DisplayName => "Fake";
         public Task<ProviderConnectionResult> ValidateAsync(CancellationToken cancellationToken = default) => Task.FromResult(ProviderConnectionResult.Connected(Id, "ok", Array.Empty<string>(), Array.Empty<string>()));
+        public Task<ProviderCapabilities> GetCapabilitiesAsync(CancellationToken cancellationToken = default) => Task.FromResult(ProviderCapabilities.Create(Id, new[] { ProviderCapability.Text, ProviderCapability.Streaming }));
         public Task<IReadOnlyList<AIModel>> GetModelsAsync(CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<AIModel>>(Array.Empty<AIModel>());
         public Task<AIResponse> SendAsync(AIRequest request, CancellationToken cancellationToken = default) => Task.FromResult(new AIResponse { Content = "fake response", Provider = Id, Model = request.Model });
 

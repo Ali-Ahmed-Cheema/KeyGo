@@ -36,6 +36,30 @@ public sealed class GeminiProvider : IAIProvider
         return ProviderConnectionResult.Connected(Id, "Gemini is reachable and the credential is valid.", new[] { "Authentication", "Model discovery", "Streaming" }, new[] { "Vision", "Audio", "Tool calling" });
     }
 
+    public Task<ProviderCapabilities> GetCapabilitiesAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(ProviderCapabilities.Create(
+            Id,
+            supported: new[]
+            {
+                ProviderCapability.Text,
+                ProviderCapability.Streaming,
+                ProviderCapability.Vision,
+                ProviderCapability.ToolCalling,
+                ProviderCapability.StructuredOutput,
+                ProviderCapability.Reasoning,
+                ProviderCapability.LongContext
+            },
+            unsupported: new[]
+            {
+                ProviderCapability.ImageGeneration,
+                ProviderCapability.AudioInput,
+                ProviderCapability.AudioOutput,
+                ProviderCapability.Embeddings
+            }));
+    }
+
     public async Task<IReadOnlyList<AIModel>> GetModelsAsync(CancellationToken cancellationToken = default)
     {
         var apiKey = await GetApiKeyAsync(cancellationToken);

@@ -89,7 +89,7 @@ public sealed class WorkspaceChatService
             Status = "Estimated"
         };
 
-        await _conversations.AddMessageAsync(conversation.Id, "assistant", response.Content, cancellationToken: cancellationToken);
+        await _conversations.AddMessageAsync(conversation.Id, "assistant", SecretSanitizer.Sanitize(response.Content), cancellationToken: cancellationToken);
 
         return new WorkspaceChatResult
         {

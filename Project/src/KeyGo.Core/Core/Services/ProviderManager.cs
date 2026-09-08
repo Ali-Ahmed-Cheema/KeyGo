@@ -10,6 +10,27 @@ public interface IProviderManager
     Task<IReadOnlyList<AIModel>> DiscoverModelsAsync(string providerId, string? credentialAlias = null, CancellationToken cancellationToken = default);
 }
 
+public sealed class ProviderCompatibilityService
+{
+    public async Task<ProviderCompatibilityResult> EvaluateAsync(IAIProvider provider, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(provider);
+
+        var capabilities = await provider.GetCapabilitiesAsync(cancellationToken);
+        var supported = capabilities.SupportedCapabilities.ToArray();
+        var score = supported.Length * 12;
+        if (score > 100) score = 100;
+
+        return new ProviderCompatibilityResult
+        {
+            Provider = provider.Id,
+            Score = score,
+            VerifiedCapabilities = supported,
+            Reason = supported.Length > 0 ? $"Provider {provider.Id} exposes {supported.Length} verified capabilities and is suitable for direct runtime use." : $"Provider {provider.Id} exposes no verified capabilities yet."
+        };
+    }
+}
+
 public sealed class ProviderManager : IProviderManager
 {
     private readonly ICredentialManager _credentialManager;

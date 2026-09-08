@@ -9,6 +9,8 @@ public interface IAIProvider
 
     Task<ProviderConnectionResult> ValidateAsync(CancellationToken cancellationToken = default);
 
+    Task<ProviderCapabilities> GetCapabilitiesAsync(CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<AIModel>> GetModelsAsync(CancellationToken cancellationToken = default);
 
     Task<AIResponse> SendAsync(AIRequest request, CancellationToken cancellationToken = default);

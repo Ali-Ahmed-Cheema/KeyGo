@@ -30,6 +30,30 @@ public sealed class AnthropicProvider : IAIProvider
             new[] { "Vision", "Audio" });
     }
 
+    public Task<ProviderCapabilities> GetCapabilitiesAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(ProviderCapabilities.Create(
+            Id,
+            supported: new[]
+            {
+                ProviderCapability.Text,
+                ProviderCapability.Streaming,
+                ProviderCapability.Vision,
+                ProviderCapability.ToolCalling,
+                ProviderCapability.StructuredOutput,
+                ProviderCapability.Reasoning,
+                ProviderCapability.LongContext
+            },
+            unsupported: new[]
+            {
+                ProviderCapability.ImageGeneration,
+                ProviderCapability.AudioInput,
+                ProviderCapability.AudioOutput,
+                ProviderCapability.Embeddings
+            }));
+    }
+
     public Task<IReadOnlyList<AIModel>> GetModelsAsync(CancellationToken cancellationToken = default)
     {
         var models = new List<AIModel>
